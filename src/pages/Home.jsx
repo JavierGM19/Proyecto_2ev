@@ -72,11 +72,6 @@ export default function Home() {
               if (!value) next.delete("q");
               else next.set("q", value);
 
-<<<<<<< Updated upstream
-              navigate({ pathname: "/", search: next.toString() }, { replace: true });
-            }}
-          />
-=======
     return (
         <div className="space-y-6">
             {/* Encabezado de la página */}
@@ -159,10 +154,10 @@ export default function Home() {
                     </li>
                 ))}
             </ul>
->>>>>>> Stashed changes
         </div>
       </div>
 
+main
       <div className="flex items-center justify-between border-b border-gray-200 pb-3">
         <p className="text-sm text-gray-500">
           Mostrando <span className="font-semibold text-gray-900">{filtered.length}</span> productos
