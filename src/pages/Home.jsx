@@ -60,7 +60,7 @@ export default function Home() {
           <label htmlFor="catalog-search" className="sr-only">
             Buscar productos
           </label>
-          <input
+          <input>
             id="catalog-search"
             className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 outline-none transition focus:border-gray-400"
             placeholder="Buscar por nombre..."
