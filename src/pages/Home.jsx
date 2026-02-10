@@ -72,9 +72,94 @@ export default function Home() {
               if (!value) next.delete("q");
               else next.set("q", value);
 
+<<<<<<< Updated upstream
               navigate({ pathname: "/", search: next.toString() }, { replace: true });
             }}
           />
+=======
+    return (
+        <div className="space-y-6">
+            {/* Encabezado de la página */}
+            <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+                <div>
+                    <h1 className="text-3xl font-semibold tracking-tight">Productos</h1>
+                    <p className="text-sm text-gray-600">
+                        Mostrando <span className="font-medium">{filtered.length}</span> productos
+                    </p>
+                </div>
+
+                {/* Buscador (por si no quieres depender del header) */}
+                <div className="w-full md:w-80">
+                    <input
+                        className="input"
+                        placeholder="Search"
+                        defaultValue={searchParams.get("q") || ""}
+                        onChange={(e) => {
+                            const next = new URLSearchParams(searchParams);
+                            const value = e.target.value.trim();
+
+                            if (!value) next.delete("q");
+                            else next.set("q", value);
+
+                            navigate({ pathname: "/", search: next.toString() }, { replace: true });
+                        
+                        }}
+                    />
+                </div>
+            </div>
+
+            {/* Filtros tipo chips (toggle) */}
+            <div className="flex flex-wrap gap-3">
+                {filterItems.map((it) => {
+                    const active = searchParams.get(it.key) === it.value;
+                    return (
+                        <button
+                            key={`${it.key}:${it.value}`}
+                            type="button"
+                            onClick={() => toggleFilter(it.key, it.value)}
+                            className={[
+                                "btn rounded-full px-4 py-2 text-sm",
+                                active
+                                    ? "bg-gray-900 text-white"
+                                    : "border border-gray-300 bg-white hover:bg-gray-50",
+                            ].join(" ")}
+                        >
+                            {it.label}
+                        </button>
+                    );
+                })}
+            </div>
+
+            {/* Grid de productos */}
+            <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {filtered.map((product) => (
+                    <li key={product.id} className="card p-4">
+                        <div className="card-image mb-4 flex items-center justify-center">
+                            <img
+                                src={product.image}
+                                alt={product.title}
+                                className="h-full w-full object-contain p-6"
+                                loading="lazy"
+                            />
+                        </div>
+
+                        <h2 className="text-sm font-semibold text-gray-900">
+                            <Link to={`/product/${product.id}`} className="hover:underline">
+                                {product.title}
+                            </Link>
+                        </h2>
+
+                        <p className="mt-2 text-sm font-medium text-gray-900">
+                            {product.price} €
+                        </p>
+
+                        <p className="mt-2 text-xs text-gray-500">
+                            {product.category}
+                        </p>
+                    </li>
+                ))}
+            </ul>
+>>>>>>> Stashed changes
         </div>
       </div>
 
