@@ -13,7 +13,13 @@ export default function ProductCard({ product }) {
           />
         </div>
 
-        <h2 className="min-h-12 text-sm font-semibold text-gray-900">{product.title}</h2>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-400">
+          {product.category}
+        </p>
+
+        <h2 className="mt-2 min-h-12 text-sm font-semibold text-gray-900">
+          {product.title}
+        </h2>
 
         <p className="mt-3 text-base font-semibold text-gray-900">{product.price} €</p>
       </Link>
