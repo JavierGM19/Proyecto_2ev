@@ -63,7 +63,6 @@ export default function Home() {
     const next = new URLSearchParams(searchParams);
     if (!value && value !== 0) next.delete(key);
     else next.set(key, String(value));
-
     setSearchParams(next, { replace: true });
   };
 
@@ -71,7 +70,6 @@ export default function Home() {
     const next = new URLSearchParams(searchParams);
     if (activeCategory === category) next.delete("category");
     else next.set("category", category);
-
     setSearchParams(next, { replace: true });
   };
 
@@ -111,83 +109,90 @@ export default function Home() {
       <div className="lg:hidden">
         <button
           type="button"
-          onClick={() => setMobileFiltersOpen((v) => !v)}
+          onClick={() => setMobileFiltersOpen((prev) => !prev)}
           className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-left text-sm font-medium text-gray-800"
         >
           {mobileFiltersOpen ? "Ocultar filtros" : "Mostrar filtros"}
         </button>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
-        <aside className={["space-y-6 rounded-2xl border border-gray-200 bg-white p-5", !mobileFiltersOpen ? "hidden lg:block" : "block"].join(" ")}>
-          <div>
-            <h2 className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">Categories</h2>
-            <div className="mt-4 space-y-2">
-              {categories.map((category) => (
-                <label key={category} className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
-                  <input
-                    type="checkbox"
-                    checked={activeCategory === category}
-                    onChange={() => toggleCategory(category)}
-                    className="h-4 w-4 rounded border-gray-300"
-                  />
-                  <span>{formatCategoryLabel(category)}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <h2 className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">Price Range</h2>
-            <div className="mt-4 space-y-3">
-              <label className="flex items-center justify-between gap-2 text-xs text-gray-500">
-                Min
-                <input
-                  type="number"
-                  min="0"
-                  value={minPrice}
-                  onChange={(e) => setParam("min", Math.max(0, Number(e.target.value || 0)))}
-                  className="w-24 rounded-lg border border-gray-200 px-2 py-1 text-sm text-gray-700"
-                />
-              </label>
-
-              <label className="flex items-center justify-between gap-2 text-xs text-gray-500">
-                Max
-                <input
-                  type="number"
-                  min="0"
-                  value={maxPrice}
-                  onChange={(e) => setParam("max", Math.max(0, Number(e.target.value || 0)))}
-                  className="w-24 rounded-lg border border-gray-200 px-2 py-1 text-sm text-gray-700"
-                />
-              </label>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={clearFilters}
-            className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-          >
-            Limpiar filtros
-          </button>
-        </aside>
-
-        <div className="space-y-4">
+      <div className="grid gap-6 lg:grid-cols-[1fr_280px] xl:grid-cols-[1fr_300px]">
+        <div className="space-y-4 order-2 lg:order-1">
           <div className="flex items-center justify-between rounded-2xl border border-gray-200 bg-white px-4 py-3">
             <p className="text-sm text-gray-500">
               Showing <span className="font-semibold text-gray-900">{filtered.length}</span> products
             </p>
           </div>
 
-          <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <ul className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
             {filtered.map((product) => (
               <li key={product.id}>
-                <ProductCard product={product} />
+                <ProductCard product={product} compact />
               </li>
             ))}
           </ul>
         </div>
+
+        <aside
+          className={[
+            "order-1 rounded-2xl border border-gray-200 bg-white p-5 lg:order-2 lg:sticky lg:top-24 lg:h-fit",
+            !mobileFiltersOpen ? "hidden lg:block" : "block",
+          ].join(" ")}
+        >
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">Categories</h2>
+              <div className="mt-4 space-y-2">
+                {categories.map((category) => (
+                  <label key={category} className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
+                    <input
+                      type="checkbox"
+                      checked={activeCategory === category}
+                      onChange={() => toggleCategory(category)}
+                      className="h-4 w-4 rounded border-gray-300"
+                    />
+                    <span>{formatCategoryLabel(category)}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <h2 className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">Price Range</h2>
+              <div className="mt-4 space-y-3">
+                <label className="flex items-center justify-between gap-2 text-xs text-gray-500">
+                  Min
+                  <input
+                    type="number"
+                    min="0"
+                    value={minPrice}
+                    onChange={(e) => setParam("min", Math.max(0, Number(e.target.value || 0)))}
+                    className="w-24 rounded-lg border border-gray-200 px-2 py-1 text-sm text-gray-700"
+                  />
+                </label>
+
+                <label className="flex items-center justify-between gap-2 text-xs text-gray-500">
+                  Max
+                  <input
+                    type="number"
+                    min="0"
+                    value={maxPrice}
+                    onChange={(e) => setParam("max", Math.max(0, Number(e.target.value || 0)))}
+                    className="w-24 rounded-lg border border-gray-200 px-2 py-1 text-sm text-gray-700"
+                  />
+                </label>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={clearFilters}
+              className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            >
+              Limpiar filtros
+            </button>
+          </div>
+        </aside>
       </div>
     </section>
   );
