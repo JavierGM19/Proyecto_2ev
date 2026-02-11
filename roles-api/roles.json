@@ -1,0 +1,10 @@
+{
+    "users": {
+        "mor_2314": {
+            "role": "admin"
+        },
+        "johnd": {
+            "role": "employee"
+        }
+    }
+}
