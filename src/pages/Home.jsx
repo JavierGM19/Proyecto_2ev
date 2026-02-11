@@ -1,153 +1,199 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
+import ProductCard from "../components/ProductCard";
 import { getProducts } from "../services/fakeStoreApi";
 
-const filterItems = [
-    { key: "tag", value: "new", label: "New Arrivals" },
-    { key: "category", value: "men", label: "Men" },
-    { key: "category", value: "women", label: "Women" },
-    { key: "category", value: "accessories", label: "Accessories" },
-];
+function formatCategoryLabel(category) {
+  return category
+    .split(" ")
+    .map((word) => word[0]?.toUpperCase() + word.slice(1))
+    .join(" ");
+}
 
 export default function Home() {
-    const navigate = useNavigate();
-    const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
-    const q = (searchParams.get("q") || "").trim().toLowerCase();
-    const activeCategory = searchParams.get("category");
-    const activeTag = searchParams.get("tag");
+  const q = (searchParams.get("q") || "").trim().toLowerCase();
+  const activeCategory = searchParams.get("category") || "";
+  const activeTag = searchParams.get("tag") || "";
+  const minPrice = Number(searchParams.get("min") || 0);
+  const maxPrice = Number(searchParams.get("max") || 1000);
 
-    const { data, isLoading, error } = useQuery({
-        queryKey: ["products"],
-        queryFn: getProducts,
-    });
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["products"],
+    queryFn: getProducts,
+  });
 
-    const toggleFilter = (key, value) => {
-        const next = new URLSearchParams(searchParams);
-        const current = next.get(key);
+  const categories = useMemo(() => {
+    if (!data) return [];
+    return [...new Set(data.map((product) => product.category).filter(Boolean))];
+  }, [data]);
 
-        if (current === value) next.delete(key);
-        else next.set(key, value);
+  const filtered = useMemo(() => {
+    if (!data) return [];
 
-        navigate({ pathname: "/", search: next.toString() }, { replace: true });
-    };
+    let list = [...data];
 
-    const filtered = useMemo(() => {
-        if (!data) return [];
+    if (q) {
+      list = list.filter((product) => product.title.toLowerCase().includes(q));
+    }
 
-        let list = data;
+    if (activeCategory) {
+      list = list.filter((product) => product.category === activeCategory);
+    }
 
-        // Buscar por título (y puedes ampliar a descripción si quieres)
-        if (q) {
-            list = list.filter((p) => p.title.toLowerCase().includes(q));
-        }
+    list = list.filter((product) => product.price >= minPrice && product.price <= maxPrice);
 
-        // Filtros UI (de momento solo para tu layout; luego lo conectamos a FakeStore real)
-        // Si quieres que realmente filtre por categorías FakeStore, me lo dices y lo mapeamos.
-        if (activeCategory) {
-            list = list.filter((p) => {
-                const cat = (p.category || "").toLowerCase();
-                if (activeCategory === "men") return cat.includes("men");
-                if (activeCategory === "women") return cat.includes("women");
-                if (activeCategory === "accessories") return cat.includes("jewel");
-                return true;
-            });
-        }
+    if (activeTag === "new") {
+      list = [...list].sort((a, b) => b.id - a.id).slice(0, 8);
+    }
 
-        if (activeTag) {
-            // "new" es un tag visual sin datos reales en FakeStore.
-            // Lo dejamos sin filtrar por ahora (solo marca el chip).
-            // Si quieres, podemos simularlo con "primeros N productos".
-        }
+    if (activeTag === "sale") {
+      list = list.filter((product) => product.price <= 50);
+    }
 
-        return list;
-    }, [data, q, activeCategory, activeTag]);
+    return list;
+  }, [activeCategory, activeTag, data, maxPrice, minPrice, q]);
 
-    if (isLoading) return <p className="text-gray-600">Cargando productos...</p>;
-    if (error) return <p className="text-red-600">Error cargando productos</p>;
+  const heroProduct = filtered[0] || data?.[0];
 
-    return (
-        <div className="space-y-6">
-            {/* Encabezado de la página */}
-            <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-                <div>
-                    <h1 className="text-3xl font-semibold tracking-tight">Productos</h1>
-                    <p className="text-sm text-gray-600">
-                        Mostrando <span className="font-medium">{filtered.length}</span> productos
-                    </p>
-                </div>
+  const setParam = (key, value) => {
+    const next = new URLSearchParams(searchParams);
+    if (!value && value !== 0) next.delete(key);
+    else next.set(key, String(value));
+    setSearchParams(next, { replace: true });
+  };
 
-                {/* Buscador (por si no quieres depender del header) */}
-                <div className="w-full md:w-80">
-                    <input
-                        className="input"
-                        placeholder="Search"
-                        defaultValue={searchParams.get("q") || ""}
-                        onChange={(e) => {
-                            const next = new URLSearchParams(searchParams);
-                            const value = e.target.value.trim();
+  const toggleCategory = (category) => {
+    const next = new URLSearchParams(searchParams);
+    if (activeCategory === category) next.delete("category");
+    else next.set("category", category);
+    setSearchParams(next, { replace: true });
+  };
 
-                            if (!value) next.delete("q");
-                            else next.set("q", value);
+  const clearFilters = () => {
+    const next = new URLSearchParams(searchParams);
+    next.delete("category");
+    next.delete("min");
+    next.delete("max");
+    setSearchParams(next, { replace: true });
+  };
 
-                            navigate({ pathname: "/", search: next.toString() }, { replace: true });
-                        }}
-                    />
-                </div>
-            </div>
+  if (isLoading) return <p className="text-gray-600">Cargando productos...</p>;
+  if (error) return <p className="text-red-600">Error cargando productos</p>;
 
-            {/* Filtros tipo chips (toggle) */}
-            <div className="flex flex-wrap gap-3">
-                {filterItems.map((it) => {
-                    const active = searchParams.get(it.key) === it.value;
-                    return (
-                        <button
-                            key={`${it.key}:${it.value}`}
-                            type="button"
-                            onClick={() => toggleFilter(it.key, it.value)}
-                            className={[
-                                "btn rounded-full px-4 py-2 text-sm",
-                                active
-                                    ? "bg-gray-900 text-white"
-                                    : "border border-gray-300 bg-white hover:bg-gray-50",
-                            ].join(" ")}
-                        >
-                            {it.label}
-                        </button>
-                    );
-                })}
-            </div>
+  return (
+    <section className="space-y-6">
+      <div className="rounded-3xl border border-gray-200 bg-white p-6 md:p-9">
+        <div className="grid gap-8 md:grid-cols-[1.3fr_1fr] md:items-center">
+          <div className="space-y-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">New Collection</p>
+            <h1 className="text-4xl font-bold tracking-tight text-gray-900 md:text-6xl">New Arrivals</h1>
+            <p className="max-w-xl text-base text-gray-600">
+              Explore our curated selection of high-quality essentials designed to elevate your daily rotation.
+            </p>
+          </div>
 
-            {/* Grid de productos */}
-            <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {filtered.map((product) => (
-                    <li key={product.id} className="card p-4">
-                        <div className="card-image mb-4 flex items-center justify-center">
-                            <img
-                                src={product.image}
-                                alt={product.title}
-                                className="h-full w-full object-contain p-6"
-                                loading="lazy"
-                            />
-                        </div>
-
-                        <h2 className="text-sm font-semibold text-gray-900">
-                            <Link to={`/product/${product.id}`} className="hover:underline">
-                                {product.title}
-                            </Link>
-                        </h2>
-
-                        <p className="mt-2 text-sm font-medium text-gray-900">
-                            {product.price} €
-                        </p>
-
-                        <p className="mt-2 text-xs text-gray-500">
-                            {product.category}
-                        </p>
-                    </li>
-                ))}
-            </ul>
+          <div className="flex items-center justify-center rounded-2xl bg-gray-50 p-6">
+            {heroProduct ? (
+              <img src={heroProduct.image} alt={heroProduct.title} className="h-56 w-full object-contain md:h-72" />
+            ) : (
+              <div className="h-56 w-full rounded-xl bg-gray-100" />
+            )}
+          </div>
         </div>
-    );
+      </div>
+
+      <div className="lg:hidden">
+        <button
+          type="button"
+          onClick={() => setMobileFiltersOpen((prev) => !prev)}
+          className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-left text-sm font-medium text-gray-800"
+        >
+          {mobileFiltersOpen ? "Ocultar filtros" : "Mostrar filtros"}
+        </button>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-[1fr_280px] xl:grid-cols-[1fr_300px]">
+        <div className="space-y-4 order-2 lg:order-1">
+          <div className="flex items-center justify-between rounded-2xl border border-gray-200 bg-white px-4 py-3">
+            <p className="text-sm text-gray-500">
+              Showing <span className="font-semibold text-gray-900">{filtered.length}</span> products
+            </p>
+          </div>
+
+          <ul className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
+            {filtered.map((product) => (
+              <li key={product.id}>
+                <ProductCard product={product} compact />
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <aside
+          className={[
+            "order-1 rounded-2xl border border-gray-200 bg-white p-5 lg:order-2 lg:sticky lg:top-24 lg:h-fit",
+            !mobileFiltersOpen ? "hidden lg:block" : "block",
+          ].join(" ")}
+        >
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">Categories</h2>
+              <div className="mt-4 space-y-2">
+                {categories.map((category) => (
+                  <label key={category} className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
+                    <input
+                      type="checkbox"
+                      checked={activeCategory === category}
+                      onChange={() => toggleCategory(category)}
+                      className="h-4 w-4 rounded border-gray-300"
+                    />
+                    <span>{formatCategoryLabel(category)}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <h2 className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">Price Range</h2>
+              <div className="mt-4 space-y-3">
+                <label className="flex items-center justify-between gap-2 text-xs text-gray-500">
+                  Min
+                  <input
+                    type="number"
+                    min="0"
+                    value={minPrice}
+                    onChange={(e) => setParam("min", Math.max(0, Number(e.target.value || 0)))}
+                    className="w-24 rounded-lg border border-gray-200 px-2 py-1 text-sm text-gray-700"
+                  />
+                </label>
+
+                <label className="flex items-center justify-between gap-2 text-xs text-gray-500">
+                  Max
+                  <input
+                    type="number"
+                    min="0"
+                    value={maxPrice}
+                    onChange={(e) => setParam("max", Math.max(0, Number(e.target.value || 0)))}
+                    className="w-24 rounded-lg border border-gray-200 px-2 py-1 text-sm text-gray-700"
+                  />
+                </label>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={clearFilters}
+              className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            >
+              Limpiar filtros
+            </button>
+          </div>
+        </aside>
+      </div>
+    </section>
+  );
 }
