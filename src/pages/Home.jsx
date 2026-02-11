@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import ProductCard from "../components/ProductCard";
@@ -77,6 +77,13 @@ export default function Home() {
     next.delete("category");
     next.delete("min");
     next.delete("max");
+    next.delete("q");
+    setSearchParams(next, { replace: true });
+  };
+
+  const closeFiltersPanel = () => {
+    const next = new URLSearchParams(searchParams);
+    next.delete("filters");
     setSearchParams(next, { replace: true });
   };
 
@@ -95,12 +102,31 @@ export default function Home() {
         </button>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_280px] xl:grid-cols-[1fr_300px]">
-        <div className="space-y-4 order-2 lg:order-1">
-          <div className="flex items-center justify-between rounded-2xl border border-gray-200 bg-white px-4 py-3">
-            <p className="text-sm text-gray-500">
-              Showing <span className="font-semibold text-gray-900">{filtered.length}</span> products
-            </p>
+          <div>
+            <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">Rango de precio</h3>
+            <div className="mt-4 space-y-3">
+              <label className="flex items-center justify-between gap-2 text-xs text-gray-500">
+                Min
+                <input
+                  type="number"
+                  min="0"
+                  value={minPrice}
+                  onChange={(e) => setParam("min", Math.max(0, Number(e.target.value || 0)))}
+                  className="w-24 rounded-lg border border-gray-200 px-2 py-1 text-sm text-gray-700"
+                />
+              </label>
+
+              <label className="flex items-center justify-between gap-2 text-xs text-gray-500">
+                Max
+                <input
+                  type="number"
+                  min="0"
+                  value={maxPrice}
+                  onChange={(e) => setParam("max", Math.max(0, Number(e.target.value || 0)))}
+                  className="w-24 rounded-lg border border-gray-200 px-2 py-1 text-sm text-gray-700"
+                />
+              </label>
+            </div>
           </div>
 
           <ul className="grid grid-cols-3 gap-3">
@@ -111,6 +137,7 @@ export default function Home() {
             ))}
           </ul>
         </div>
+      </aside>
 
         <aside
           className={[
