@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, NavLink, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
+import { ExitLoginIcon, LoginIcon, NoLoginIcon } from "../img/loginIcons";
 
 const navItems = [
   { label: "Shop", search: "" },
@@ -27,15 +28,6 @@ function IconBag(props) {
   );
 }
 
-function IconUser(props) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" {...props}>
-      <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Z" stroke="currentColor" strokeWidth="1.6" />
-      <path d="M4.5 21a7.5 7.5 0 0 1 15 0" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-    </svg>
-  );
-}
-
 function IconMenu(props) {
   return (
     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" {...props}>
@@ -48,11 +40,25 @@ export default function Header() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [isLoginIconHovered, setIsLoginIconHovered] = useState(false);
 
   const isLogged = useAuthStore((s) => s.isLogged);
   const logout = useAuthStore((s) => s.logout);
 
   const q = searchParams.get("q") || "";
+
+  const loginButtonLabel = isLogged ? "Cerrar sesión" : "Ir a login";
+  const loginButtonAlt = isLogged
+    ? isLoginIconHovered
+      ? "Cerrar sesión"
+      : "Usuario logeado"
+    : "Usuario sin sesión";
+
+  const LoginVisualIcon = !isLogged
+    ? NoLoginIcon
+    : isLoginIconHovered
+      ? ExitLoginIcon
+      : LoginIcon;
 
   const updateSearch = (value) => {
     const sp = new URLSearchParams(searchParams);
@@ -105,8 +111,10 @@ export default function Header() {
         <div className="ml-auto flex items-center gap-1 md:ml-0">
           <button
             type="button"
-            aria-label="Cuenta"
-            title="Cuenta"
+            aria-label={loginButtonLabel}
+            title={loginButtonLabel}
+            onMouseEnter={() => setIsLoginIconHovered(true)}
+            onMouseLeave={() => setIsLoginIconHovered(false)}
             onClick={() => {
               if (isLogged) {
                 logout();
@@ -117,7 +125,7 @@ export default function Header() {
             }}
             className="inline-flex h-9 w-9 items-center justify-center rounded-md text-gray-700 hover:bg-gray-100"
           >
-            <IconUser className="h-5 w-5" />
+            <span role="img" aria-label={loginButtonAlt} className="inline-flex items-center justify-center"><LoginVisualIcon className="h-7 w-7" /></span>
           </button>
           <button
             type="button"
