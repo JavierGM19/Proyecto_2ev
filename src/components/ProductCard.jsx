@@ -2,8 +2,8 @@ import { Link } from "react-router-dom";
 
 export default function ProductCard({ product }) {
   return (
-    <article className="group rounded-2xl border border-gray-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-      <Link to={`/product/${product.id}`} className="block">
+    <article className="group h-full rounded-2xl border border-gray-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+      <Link to={`/product/${product.id}`} className="block h-full">
         <div className="mb-4 flex aspect-square items-center justify-center rounded-xl bg-gray-50 p-6">
           <img
             src={product.image}
@@ -13,14 +13,8 @@ export default function ProductCard({ product }) {
           />
         </div>
 
-        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-400">
-          {product.category}
-        </p>
-
-        <h2 className="mt-2 min-h-12 text-sm font-semibold text-gray-900">
-          {product.title}
-        </h2>
-
+        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-400">{product.category}</p>
+        <h2 className="mt-2 min-h-12 text-sm font-semibold text-gray-900">{product.title}</h2>
         <p className="mt-3 text-base font-semibold text-gray-900">{product.price} €</p>
       </Link>
     </article>

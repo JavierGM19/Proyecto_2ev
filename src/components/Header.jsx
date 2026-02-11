@@ -1,11 +1,12 @@
+import { useState } from "react";
 import { Link, NavLink, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
 
-const shopTabs = [
-  { label: "Novedades", key: "tag", value: "new" },
-  { label: "Hombre", key: "category", value: "men" },
-  { label: "Mujer", key: "category", value: "women" },
-  { label: "Accesorios", key: "category", value: "accessories" },
+const navItems = [
+  { label: "Shop", search: "" },
+  { label: "New Arrivals", search: "?tag=new" },
+  { label: "Sale", search: "?tag=sale" },
+  { label: "About", to: "/login" },
 ];
 
 function IconSearch(props) {
@@ -20,12 +21,7 @@ function IconSearch(props) {
 function IconBag(props) {
   return (
     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" {...props}>
-      <path
-        d="M6.5 8.5h11l-1 13h-9l-1-13Z"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinejoin="round"
-      />
+      <path d="M6.5 8.5h11l-1 13h-9l-1-13Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
       <path d="M9 8.5a3 3 0 0 1 6 0" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
     </svg>
   );
@@ -40,90 +36,77 @@ function IconUser(props) {
   );
 }
 
+function IconMenu(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" {...props}>
+      <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 export default function Header() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const isLogged = useAuthStore((s) => s.isLogged);
-  const role = useAuthStore((s) => s.role);
   const logout = useAuthStore((s) => s.logout);
 
   const q = searchParams.get("q") || "";
 
-  const onSearchChange = (value) => {
+  const updateSearch = (value) => {
     const sp = new URLSearchParams(searchParams);
-    if (!value) sp.delete("q");
-    else sp.set("q", value);
+    if (!value.trim()) sp.delete("q");
+    else sp.set("q", value.trim());
     navigate({ pathname: "/", search: sp.toString() }, { replace: true });
   };
 
-  const handleShopTab = (key, value) => {
-    const next = new URLSearchParams(searchParams);
-
-    if (key === "tag") {
-      next.delete("category");
-    } else {
-      next.delete("tag");
+  const goToNav = (item) => {
+    if (item.to) {
+      navigate(item.to);
+      setMobileOpen(false);
+      return;
     }
 
-    const current = next.get(key);
-    if (current === value) next.delete(key);
-    else next.set(key, value);
-
-    navigate({ pathname: "/", search: next.toString() }, { replace: true });
+    navigate({ pathname: "/", search: item.search?.replace("?", "") || "" });
+    setMobileOpen(false);
   };
 
-  const isShopTabActive = (key, value) => searchParams.get(key) === value;
-
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white/95 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
-        <Link to="/" className="text-lg font-semibold tracking-tight text-gray-900">
+    <header className="sticky top-0 z-50 border-b border-gray-200 bg-white">
+      <div className="mx-auto flex h-16 w-full max-w-7xl items-center gap-4 px-4 md:h-18 md:px-6">
+        <Link to="/" className="text-xl font-bold tracking-tight text-gray-900">
           react-ecomers
         </Link>
 
-        <nav className="hidden items-center gap-5 md:flex">
-          <NavLink to="/" className="text-sm font-medium text-gray-700 transition hover:text-gray-900">
-            Inicio
-          </NavLink>
-          <NavLink to="/login" className="text-sm font-medium text-gray-700 transition hover:text-gray-900">
-            Login
-          </NavLink>
-          {isLogged && role === "admin" && (
-            <NavLink to="/admin" className="text-sm font-medium text-gray-700 transition hover:text-gray-900">
-              Admin
-            </NavLink>
-          )}
+        <nav className="hidden items-center gap-6 md:flex">
+          {navItems.map((item) => (
+            <button
+              key={item.label}
+              type="button"
+              onClick={() => goToNav(item)}
+              className="text-sm font-medium text-gray-700 transition hover:text-gray-950"
+            >
+              {item.label}
+            </button>
+          ))}
         </nav>
 
-        <div className="hidden items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 md:flex">
+        <div className="ml-auto hidden max-w-xs flex-1 items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 lg:flex">
           <IconSearch className="h-4 w-4 text-gray-500" />
           <input
             value={q}
-            onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Buscar productos..."
-            className="w-48 bg-transparent text-sm text-gray-800 outline-none placeholder:text-gray-400"
+            onChange={(e) => updateSearch(e.target.value)}
+            placeholder="Search collections..."
+            className="w-full bg-transparent text-sm text-gray-800 outline-none placeholder:text-gray-400"
           />
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-1 md:ml-0">
           <button
             type="button"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50"
-            onClick={() => navigate("/")}
-          >
-            <IconSearch className="h-4 w-4" /> Buscar
-          </button>
-          <button
-            type="button"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50"
-            onClick={() => navigate("/")}
-          >
-            <IconBag className="h-4 w-4" /> Carrito
-          </button>
-          <button
-            type="button"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50"
+            aria-label="Cuenta"
+            title="Cuenta"
             onClick={() => {
               if (isLogged) {
                 logout();
@@ -132,34 +115,63 @@ export default function Header() {
               }
               navigate("/login");
             }}
+            className="inline-flex h-9 w-9 items-center justify-center rounded-md text-gray-700 hover:bg-gray-100"
           >
-            <IconUser className="h-4 w-4" /> {isLogged ? "Salir" : "Cuenta"}
+            <IconUser className="h-5 w-5" />
+          </button>
+          <button
+            type="button"
+            aria-label="Carrito"
+            title="Carrito"
+            onClick={() => navigate("/")}
+            className="inline-flex h-9 w-9 items-center justify-center rounded-md text-gray-700 hover:bg-gray-100"
+          >
+            <IconBag className="h-5 w-5" />
+          </button>
+          <button
+            type="button"
+            aria-label="Menú"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-md text-gray-700 hover:bg-gray-100 md:hidden"
+            onClick={() => setMobileOpen((v) => !v)}
+          >
+            <IconMenu className="h-5 w-5" />
           </button>
         </div>
       </div>
 
-      <div className="border-t border-gray-100 bg-gray-50/70">
-        <div className="mx-auto flex max-w-6xl gap-2 overflow-x-auto px-4 py-2.5">
-          {shopTabs.map((tab) => {
-            const active = isShopTabActive(tab.key, tab.value);
-            return (
+      {mobileOpen && (
+        <div className="border-t border-gray-100 bg-white px-4 py-3 md:hidden">
+          <div className="mb-3 flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2">
+            <IconSearch className="h-4 w-4 text-gray-500" />
+            <input
+              value={q}
+              onChange={(e) => updateSearch(e.target.value)}
+              placeholder="Search collections..."
+              className="w-full bg-transparent text-sm text-gray-800 outline-none placeholder:text-gray-400"
+            />
+          </div>
+
+          <div className="flex flex-col gap-1">
+            {navItems.map((item) => (
               <button
-                key={`${tab.key}:${tab.value}`}
+                key={`mobile-${item.label}`}
                 type="button"
-                onClick={() => handleShopTab(tab.key, tab.value)}
-                className={[
-                  "whitespace-nowrap rounded-full border px-4 py-1.5 text-sm font-medium transition",
-                  active
-                    ? "border-gray-900 bg-gray-900 text-white"
-                    : "border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:text-gray-900",
-                ].join(" ")}
+                onClick={() => goToNav(item)}
+                className="rounded-lg px-3 py-2 text-left text-sm font-medium text-gray-700 hover:bg-gray-50"
               >
-                {tab.label}
+                {item.label}
               </button>
-            );
-          })}
+            ))}
+            <NavLink
+              to="/login"
+              onClick={() => setMobileOpen(false)}
+              className="rounded-lg px-3 py-2 text-left text-sm font-medium text-gray-700 hover:bg-gray-50"
+            >
+              Login
+            </NavLink>
+          </div>
         </div>
-      </div>
+      )}
     </header>
   );
 }
