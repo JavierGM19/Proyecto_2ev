@@ -21,7 +21,6 @@ export default function CartModal({ open, onClose }) {
     const removeItem = useCartStore((s) => s.removeItem);
     const setQuantity = useCartStore((s) => s.setQuantity);
     const clearCart = useCartStore((s) => s.clearCart);
-    const totalPrice = useCartStore((s) => s.totalPrice);
 
     const isLogged = useAuthStore((s) => s.isLogged);
 
@@ -38,7 +37,8 @@ export default function CartModal({ open, onClose }) {
 
     if (!open) return null;
 
-    const total = totalPrice();
+    // Total calculado desde items (no depende del store)
+    const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
     const handleBuy = () => {
         if (!isLogged) {
@@ -47,7 +47,6 @@ export default function CartModal({ open, onClose }) {
             return;
         }
 
-        // Compra simulada
         alert("Compra realizada (simulada). ¡Gracias!");
         clearCart();
         onClose?.();
@@ -71,9 +70,7 @@ export default function CartModal({ open, onClose }) {
                         <div>
                             <h2 className="text-lg font-semibold text-gray-900">Carrito</h2>
                             <p className="text-sm text-gray-500">
-                                {items.length === 0
-                                    ? "Tu carrito está vacío"
-                                    : `Productos: ${items.length}`}
+                                {items.length === 0 ? "Tu carrito está vacío" : `Productos: ${items.length}`}
                             </p>
                         </div>
 
@@ -97,10 +94,7 @@ export default function CartModal({ open, onClose }) {
                                     const subtotal = item.price * item.quantity;
 
                                     return (
-                                        <li
-                                            key={item.id}
-                                            className="rounded-2xl border border-gray-200 p-4"
-                                        >
+                                        <li key={item.id} className="rounded-2xl border border-gray-200 p-4">
                                             <div className="flex gap-3">
                                                 <div className="h-16 w-16 flex-none rounded-xl bg-gray-50 p-2">
                                                     <img
@@ -117,9 +111,7 @@ export default function CartModal({ open, onClose }) {
                                                     </p>
 
                                                     <div className="mt-1 flex items-center justify-between">
-                                                        <p className="text-sm text-gray-700">
-                                                            {formatEUR(item.price)}
-                                                        </p>
+                                                        <p className="text-sm text-gray-700">{formatEUR(item.price)}</p>
                                                         <p className="text-sm font-semibold text-gray-900">
                                                             {formatEUR(subtotal)}
                                                         </p>
@@ -130,9 +122,7 @@ export default function CartModal({ open, onClose }) {
                                                             type="number"
                                                             min="1"
                                                             value={item.quantity}
-                                                            onChange={(e) =>
-                                                                setQuantity(item.id, e.target.value)
-                                                            }
+                                                            onChange={(e) => setQuantity(item.id, e.target.value)}
                                                             className="w-24 rounded-xl border border-gray-200 px-3 py-2 text-sm text-gray-800 outline-none focus:border-gray-400"
                                                         />
 
@@ -156,9 +146,7 @@ export default function CartModal({ open, onClose }) {
                     <div className="border-t border-gray-200 px-5 py-4">
                         <div className="flex items-center justify-between text-sm">
                             <span className="text-gray-600">Total</span>
-                            <span className="font-semibold text-gray-900">
-                                {formatEUR(total)}
-                            </span>
+                            <span className="font-semibold text-gray-900">{formatEUR(total)}</span>
                         </div>
 
                         <button
@@ -172,15 +160,12 @@ export default function CartModal({ open, onClose }) {
                                     : "bg-gray-900 text-white hover:bg-gray-800",
                             ].join(" ")}
                         >
-                            {isLogged
-                                ? `Comprar — ${formatEUR(total)}`
-                                : "Inicia sesión para comprar"}
+                            {isLogged ? `Comprar — ${formatEUR(total)}` : "Inicia sesión para comprar"}
                         </button>
 
                         {!isLogged && items.length > 0 && (
                             <p className="mt-2 text-xs text-gray-500">
-                                Puedes añadir productos sin sesión, pero necesitas iniciar
-                                sesión para finalizar la compra.
+                                Puedes añadir productos sin sesión, pero necesitas iniciar sesión para finalizar la compra.
                             </p>
                         )}
                     </div>
