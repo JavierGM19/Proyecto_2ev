@@ -1,9 +1,12 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getProductById } from "../services/fakeStoreApi";
+import { useCartStore } from "../store/cartStore";
 
 export default function ProductosDetail() {
     const { id } = useParams();
+    const navigate = useNavigate();
+    const addItem = useCartStore((s) => s.addItem);
 
     const { data, isLoading, error } = useQuery({
         queryKey: ["product", id],
@@ -23,15 +26,22 @@ export default function ProductosDetail() {
                 <img
                     src={data.image}
                     alt={data.title}
-                    className="w-full max-w-sm"
+                    className="w-full max-w-sm object-contain"
                 />
 
                 <div>
                     <p className="text-lg font-semibold">{data.price} €</p>
                     <p className="mt-4">{data.description}</p>
 
-                    <button className="mt-6 border px-4 py-2">
-                        Añadir al carrito (más adelante)
+                    <button
+                        type="button"
+                        onClick={() => {
+                            addItem(data);
+                            navigate("/", { replace: true });
+                        }}
+                        className="mt-6 rounded-xl bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-800"
+                    >
+                        Añadir al carrito
                     </button>
                 </div>
             </div>
