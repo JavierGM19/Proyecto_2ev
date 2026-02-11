@@ -95,7 +95,23 @@ export default function Home() {
         </button>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[300px_1fr]">
+      <div className="grid gap-6 lg:grid-cols-[1fr_280px] xl:grid-cols-[1fr_300px]">
+        <div className="space-y-4 order-2 lg:order-1">
+          <div className="flex items-center justify-between rounded-2xl border border-gray-200 bg-white px-4 py-3">
+            <p className="text-sm text-gray-500">
+              Showing <span className="font-semibold text-gray-900">{filtered.length}</span> products
+            </p>
+          </div>
+
+          <ul className="grid grid-cols-3 gap-3">
+            {filtered.map((product) => (
+              <li key={product.id}>
+                <ProductCard product={product} compact />
+              </li>
+            ))}
+          </ul>
+        </div>
+
         <aside
           className={[
             "order-1 rounded-2xl border border-gray-200 bg-white p-5 lg:sticky lg:top-28 lg:h-fit",
