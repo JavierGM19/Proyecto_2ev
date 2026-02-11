@@ -1,0 +1,10 @@
+En una terminal nueva:
+
+cd server
+npm install
+npm run start
+
+
+Como no hemos puesto script start aún, puedes arrancar así:
+
+node index.js
