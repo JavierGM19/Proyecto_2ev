@@ -1,7 +1,11 @@
 import { useState } from "react";
 import { Link, NavLink, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
-import { ExitLoginIcon, LoginIcon, NoLoginIcon } from "../img/loginIcons";
+
+// PNG icons
+import loginPng from "../img/login.png";
+import noLoginPng from "../img/sin_login.png";
+import exitLoginPng from "../img/exit_login.png";
 
 const navItems = [
   { label: "Shop", search: "" },
@@ -13,8 +17,17 @@ const navItems = [
 function IconSearch(props) {
   return (
     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" {...props}>
-      <path d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" stroke="currentColor" strokeWidth="1.6" />
-      <path d="M16.2 16.2 21 21" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+      <path
+        d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z"
+        stroke="currentColor"
+        strokeWidth="1.6"
+      />
+      <path
+        d="M16.2 16.2 21 21"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
@@ -22,8 +35,18 @@ function IconSearch(props) {
 function IconBag(props) {
   return (
     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" {...props}>
-      <path d="M6.5 8.5h11l-1 13h-9l-1-13Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
-      <path d="M9 8.5a3 3 0 0 1 6 0" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+      <path
+        d="M6.5 8.5h11l-1 13h-9l-1-13Z"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M9 8.5a3 3 0 0 1 6 0"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
@@ -31,7 +54,12 @@ function IconBag(props) {
 function IconMenu(props) {
   return (
     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" {...props}>
-      <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <path
+        d="M4 7h16M4 12h16M4 17h16"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
@@ -48,18 +76,23 @@ export default function Header() {
   const q = searchParams.get("q") || "";
 
   const loginButtonLabel = isLogged ? "Cerrar sesión" : "Ir a login";
-  const loginButtonText = isLogged ? (isLoginIconHovered ? "Salir" : "Mi cuenta") : "Login";
-  const loginButtonAlt = isLogged
+  const loginButtonText = isLogged
+    ? isLoginIconHovered
+      ? "Salir"
+      : "Mi cuenta"
+    : "Login";
+
+  const loginImageAlt = isLogged
     ? isLoginIconHovered
       ? "Cerrar sesión"
       : "Usuario logeado"
     : "Usuario sin sesión";
 
-  const LoginVisualIcon = !isLogged
-    ? NoLoginIcon
+  const loginImageSrc = !isLogged
+    ? noLoginPng
     : isLoginIconHovered
-      ? ExitLoginIcon
-      : LoginIcon;
+      ? exitLoginPng
+      : loginPng;
 
   const updateSearch = (value) => {
     const sp = new URLSearchParams(searchParams);
@@ -77,6 +110,15 @@ export default function Header() {
 
     navigate({ pathname: "/", search: item.search?.replace("?", "") || "" });
     setMobileOpen(false);
+  };
+
+  const handleLoginClick = () => {
+    if (isLogged) {
+      logout();
+      navigate("/", { replace: true });
+      return;
+    }
+    navigate("/login");
   };
 
   return (
@@ -116,19 +158,20 @@ export default function Header() {
             title={loginButtonLabel}
             onMouseEnter={() => setIsLoginIconHovered(true)}
             onMouseLeave={() => setIsLoginIconHovered(false)}
-            onClick={() => {
-              if (isLogged) {
-                logout();
-                navigate("/", { replace: true });
-                return;
-              }
-              navigate("/login");
-            }}
+            onClick={handleLoginClick}
             className="inline-flex h-9 items-center justify-center gap-1 rounded-md px-1.5 text-gray-700 hover:bg-gray-100"
           >
-            <span role="img" aria-label={loginButtonAlt} className="inline-flex items-center justify-center"><LoginVisualIcon className="h-7 w-7" /></span>
-            <span className="hidden text-xs font-medium sm:inline">{loginButtonText}</span>
+            <img
+              src={loginImageSrc}
+              alt={loginImageAlt}
+              className="h-7 w-7 object-contain"
+              draggable="false"
+            />
+            <span className="hidden text-xs font-medium sm:inline">
+              {loginButtonText}
+            </span>
           </button>
+
           <button
             type="button"
             aria-label="Carrito"
@@ -138,6 +181,7 @@ export default function Header() {
           >
             <IconBag className="h-5 w-5" />
           </button>
+
           <button
             type="button"
             aria-label="Menú"
@@ -172,6 +216,8 @@ export default function Header() {
                 {item.label}
               </button>
             ))}
+
+            {/* Mantengo tu NavLink de login en el menú móvil */}
             <NavLink
               to="/login"
               onClick={() => setMobileOpen(false)}
