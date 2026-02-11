@@ -57,8 +57,6 @@ export default function Home() {
     return list;
   }, [activeCategory, activeTag, data, maxPrice, minPrice, q]);
 
-  const heroProduct = filtered[0] || data?.[0];
-
   const setParam = (key, value) => {
     const next = new URLSearchParams(searchParams);
     if (!value && value !== 0) next.delete(key);
@@ -86,26 +84,6 @@ export default function Home() {
 
   return (
     <section className="space-y-6">
-      <div className="rounded-3xl border border-gray-200 bg-white p-6 md:p-9">
-        <div className="grid gap-8 md:grid-cols-[1.3fr_1fr] md:items-center">
-          <div className="space-y-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">New Collection</p>
-            <h1 className="text-4xl font-bold tracking-tight text-gray-900 md:text-6xl">New Arrivals</h1>
-            <p className="max-w-xl text-base text-gray-600">
-              Explore our curated selection of high-quality essentials designed to elevate your daily rotation.
-            </p>
-          </div>
-
-          <div className="flex items-center justify-center rounded-2xl bg-gray-50 p-6">
-            {heroProduct ? (
-              <img src={heroProduct.image} alt={heroProduct.title} className="h-56 w-full object-contain md:h-72" />
-            ) : (
-              <div className="h-56 w-full rounded-xl bg-gray-100" />
-            )}
-          </div>
-        </div>
-      </div>
-
       <div className="lg:hidden">
         <button
           type="button"
@@ -124,7 +102,7 @@ export default function Home() {
             </p>
           </div>
 
-          <ul className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
+          <ul className="grid grid-cols-1 gap-3 2xl:grid-cols-2">
             {filtered.map((product) => (
               <li key={product.id}>
                 <ProductCard product={product} compact />
