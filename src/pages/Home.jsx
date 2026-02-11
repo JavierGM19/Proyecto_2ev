@@ -14,6 +14,7 @@ function formatCategoryLabel(category) {
 export default function Home() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const filtersPanelOpen = searchParams.get("filters") === "open";
 
   const q = (searchParams.get("q") || "").trim().toLowerCase();
   const activeCategory = searchParams.get("category") || "";
@@ -64,9 +65,9 @@ export default function Home() {
     setSearchParams(next, { replace: true });
   };
 
-  const toggleCategory = (category) => {
+  const setCategory = (category) => {
     const next = new URLSearchParams(searchParams);
-    if (activeCategory === category) next.delete("category");
+    if (!category) next.delete("category");
     else next.set("category", category);
     setSearchParams(next, { replace: true });
   };
@@ -90,7 +91,7 @@ export default function Home() {
           onClick={() => setMobileFiltersOpen((prev) => !prev)}
           className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-left text-sm font-medium text-gray-800"
         >
-          {mobileFiltersOpen ? "Ocultar filtros" : "Mostrar filtros"}
+          {mobileFiltersOpen || filtersPanelOpen ? "Ocultar búsqueda y filtros" : "Mostrar búsqueda y filtros"}
         </button>
       </div>
 
@@ -113,24 +114,51 @@ export default function Home() {
 
         <aside
           className={[
-            "order-1 rounded-2xl border border-gray-200 bg-white p-5 lg:order-2 lg:sticky lg:top-24 lg:h-fit",
-            !mobileFiltersOpen ? "hidden lg:block" : "block",
+            "order-1 rounded-2xl border border-gray-200 bg-white p-5 lg:sticky lg:top-28 lg:h-fit",
+            !mobileFiltersOpen && !filtersPanelOpen ? "hidden lg:hidden" : "block",
           ].join(" ")}
         >
           <div className="space-y-6">
             <div>
-              <h2 className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">Categories</h2>
-              <div className="mt-4 space-y-2">
+              <h2 className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">Buscar</h2>
+              <div className="mt-3">
+                <input
+                  type="text"
+                  value={q}
+                  onChange={(e) => setParam("q", e.target.value)}
+                  placeholder="Buscar productos..."
+                  className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-800 outline-none"
+                />
+              </div>
+            </div>
+
+            <div>
+              <h2 className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">Categorías</h2>
+              <div className="mt-4 grid gap-2">
+                <button
+                  type="button"
+                  onClick={() => setCategory("")}
+                  className={[
+                    "rounded-lg border px-3 py-2 text-left text-sm font-medium transition",
+                    !activeCategory ? "border-gray-900 bg-gray-900 text-white" : "border-gray-200 text-gray-700 hover:bg-gray-50",
+                  ].join(" ")}
+                >
+                  Todas
+                </button>
                 {categories.map((category) => (
-                  <label key={category} className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
-                    <input
-                      type="checkbox"
-                      checked={activeCategory === category}
-                      onChange={() => toggleCategory(category)}
-                      className="h-4 w-4 rounded border-gray-300"
-                    />
-                    <span>{formatCategoryLabel(category)}</span>
-                  </label>
+                  <button
+                    key={category}
+                    type="button"
+                    onClick={() => setCategory(activeCategory === category ? "" : category)}
+                    className={[
+                      "rounded-lg border px-3 py-2 text-left text-sm font-medium transition",
+                      activeCategory === category
+                        ? "border-gray-900 bg-gray-900 text-white"
+                        : "border-gray-200 text-gray-700 hover:bg-gray-50",
+                    ].join(" ")}
+                  >
+                    {formatCategoryLabel(category)}
+                  </button>
                 ))}
               </div>
             </div>
@@ -171,6 +199,23 @@ export default function Home() {
             </button>
           </div>
         </aside>
+
+        <div className="space-y-4 order-2 lg:order-2">
+          <div className="flex items-center justify-between rounded-2xl border border-gray-200 bg-white px-4 py-3">
+            <p className="text-sm text-gray-500">
+              Showing <span className="font-semibold text-gray-900">{filtered.length}</span> products
+            </p>
+          </div>
+
+          <ul className="grid grid-cols-1 gap-3 2xl:grid-cols-2">
+            {filtered.map((product) => (
+              <li key={product.id}>
+                <ProductCard product={product} compact />
+              </li>
+            ))}
+          </ul>
+        </div>
+
       </div>
     </section>
   );
