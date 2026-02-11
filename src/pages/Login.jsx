@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { login } from "../services/fakeStoreApi";
 import { useAuthStore } from "../store/authStore";
-import { useUsersStore } from "../store/usersStore";
+
+const ROLES_API_URL = "http://localhost:4000/role";
 
 export default function Login() {
     const navigate = useNavigate();
@@ -11,10 +12,6 @@ export default function Login() {
     const setSession = useAuthStore((s) => s.setSession);
     const isLogged = useAuthStore((s) => s.isLogged);
     const roleStored = useAuthStore((s) => s.role);
-
-    // Users store (roles locales)
-    const ensureUser = useUsersStore((s) => s.ensureUser);
-    const getUserRole = useUsersStore((s) => s.getUserRole);
 
     // Form state
     const [username, setUsername] = useState("");
@@ -39,13 +36,26 @@ export default function Login() {
 
         try {
             const cleanUsername = username.trim();
-            const data = await login(cleanUsername, password); // POST real
+            const data = await login(cleanUsername, password); // Login Fake Store API
 
-            // Registrar usuario local si no existe y leer rol local
-            ensureUser(cleanUsername);
-            const role = getUserRole(cleanUsername) || "user";
+            let role = "user";
 
-            setSession({ token: data.token, role });
+            try {
+                const roleResponse = await fetch(ROLES_API_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username: cleanUsername }),
+                });
+
+                if (roleResponse.ok) {
+                    const roleData = await roleResponse.json();
+                    role = roleData?.role || "user";
+                }
+            } catch {
+                role = "user";
+            }
+
+            setSession({ token: data.token, role, username: cleanUsername });
 
             // Redirección según rol
             if (role === "admin") navigate("/admin", { replace: true });
