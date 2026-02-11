@@ -48,6 +48,7 @@ export default function Header() {
   const q = searchParams.get("q") || "";
 
   const loginButtonLabel = isLogged ? "Cerrar sesión" : "Ir a login";
+  const loginButtonText = isLogged ? (isLoginIconHovered ? "Salir" : "Mi cuenta") : "Login";
   const loginButtonAlt = isLogged
     ? isLoginIconHovered
       ? "Cerrar sesión"
@@ -123,16 +124,17 @@ export default function Header() {
               }
               navigate("/login");
             }}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-md text-gray-700 hover:bg-gray-100"
+            className="inline-flex h-9 items-center justify-center gap-1 rounded-md px-1.5 text-gray-700 hover:bg-gray-100"
           >
             <span role="img" aria-label={loginButtonAlt} className="inline-flex items-center justify-center"><LoginVisualIcon className="h-7 w-7" /></span>
+            <span className="hidden text-xs font-medium sm:inline">{loginButtonText}</span>
           </button>
           <button
             type="button"
             aria-label="Carrito"
             title="Carrito"
             onClick={() => navigate("/")}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-md text-gray-700 hover:bg-gray-100"
+            className="inline-flex h-9 items-center justify-center gap-1 rounded-md px-1.5 text-gray-700 hover:bg-gray-100"
           >
             <IconBag className="h-5 w-5" />
           </button>

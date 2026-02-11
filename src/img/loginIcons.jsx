@@ -1,5 +1,3 @@
-import React from "react";
-
 const baseProps = {
   viewBox: "0 0 24 24",
   fill: "none",
@@ -9,10 +7,9 @@ const baseProps = {
 export function NoLoginIcon({ className = "h-7 w-7" }) {
   return (
     <svg {...baseProps} className={className} aria-hidden="true">
-      <circle cx="12" cy="8" r="3.4" stroke="currentColor" strokeWidth="1.6" />
-      <path d="M5 20a7 7 0 0 1 14 0" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-      <path d="M17.5 6.5 21 10" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-      <path d="M21 6.5 17.5 10" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+      <circle cx="12" cy="12" r="10" fill="#F3F4F6" />
+      <circle cx="12" cy="8.5" r="3" fill="#6B7280" />
+      <path d="M6.5 18a5.5 5.5 0 0 1 11 0" stroke="#6B7280" strokeWidth="2" strokeLinecap="round" />
     </svg>
   );
 }
@@ -20,10 +17,10 @@ export function NoLoginIcon({ className = "h-7 w-7" }) {
 export function LoginIcon({ className = "h-7 w-7" }) {
   return (
     <svg {...baseProps} className={className} aria-hidden="true">
-      <circle cx="12" cy="8" r="3.4" stroke="currentColor" strokeWidth="1.6" />
-      <path d="M5 20a7 7 0 0 1 14 0" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-      <path d="M16.5 3.5h4v4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-      <path d="m20.5 3.5-3.2 3.2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+      <circle cx="12" cy="12" r="10" fill="#DCFCE7" />
+      <circle cx="12" cy="8.5" r="3" fill="#166534" />
+      <path d="M6.5 18a5.5 5.5 0 0 1 11 0" stroke="#166534" strokeWidth="2" strokeLinecap="round" />
+      <path d="m16.2 4.8 1.6 1.6 2.6-2.6" stroke="#166534" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -31,10 +28,11 @@ export function LoginIcon({ className = "h-7 w-7" }) {
 export function ExitLoginIcon({ className = "h-7 w-7" }) {
   return (
     <svg {...baseProps} className={className} aria-hidden="true">
-      <circle cx="9.5" cy="8" r="3.4" stroke="currentColor" strokeWidth="1.6" />
-      <path d="M2.5 20a7 7 0 0 1 14 0" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-      <path d="M14 12h7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-      <path d="m18.5 9 3 3-3 3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="12" cy="12" r="10" fill="#FEE2E2" />
+      <circle cx="9.5" cy="8.5" r="3" fill="#991B1B" />
+      <path d="M4.5 18a5.5 5.5 0 0 1 10.5 0" stroke="#991B1B" strokeWidth="2" strokeLinecap="round" />
+      <path d="M13.8 12h6" stroke="#991B1B" strokeWidth="2" strokeLinecap="round" />
+      <path d="m17.2 9.8 2.2 2.2-2.2 2.2" stroke="#991B1B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
