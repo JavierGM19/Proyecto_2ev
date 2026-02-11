@@ -1,0 +1,80 @@
+INTEGRACIÓN API DE ROLES (YA CREADA) - PASOS DE USO
+====================================================
+
+Este proyecto YA está integrado para:
+1) Login real con Fake Store API
+2) Consulta de rol contra API local: http://localhost:4000/role
+3) Guardado de sesión en Zustand con token + role + username
+
+---------------------------------
+1. ARRANCAR TU API DE ROLES
+---------------------------------
+(Usa el comando que tenga tu API. Ejemplo si es Node)
+
+  npm run dev
+
+Debes dejarla viva en:
+
+  http://localhost:4000
+
+Endpoint esperado por el frontend:
+
+  POST http://localhost:4000/role
+  Body JSON: { "username": "mor_2314" }
+  Respuesta: { "role": "admin" } (o user/employee)
+
+
+---------------------------------
+2. ARRANCAR EL FRONTEND
+---------------------------------
+Desde la carpeta del proyecto React:
+
+  npm install
+  npm run dev
+
+
+---------------------------------
+3. PROBAR SI LA API RESPONDE
+---------------------------------
+En otra terminal:
+
+  curl -X POST http://localhost:4000/role \
+    -H "Content-Type: application/json" \
+    -d '{"username":"mor_2314"}'
+
+Si responde JSON con "role", está OK.
+
+
+---------------------------------
+4. PROBAR LOGIN COMPLETO
+---------------------------------
+En la web usa:
+
+  username: mor_2314
+  password: 83r5^_
+
+Flujo:
+- Fake Store devuelve token.
+- Frontend consulta /role con ese username.
+- Guarda sesión con token, role y username.
+- Si role=admin -> redirige a /admin
+- Si no -> redirige a /
+
+
+---------------------------------
+5. SI FALLA LA API DE ROLES
+---------------------------------
+Si /role falla o no responde, la app usa rol por defecto:
+
+  role = "user"
+
+Esto evita romper el login.
+
+
+---------------------------------
+6. MINI EXPLICACIÓN TÉCNICA
+---------------------------------
+- El login NO se cambió: sigue siendo Fake Store (/auth/login).
+- Solo se añadió una segunda llamada POST a tu API local para rol real.
+- El estado global se guarda en authStore (Zustand persistido).
+- Al cerrar sesión se limpia token/role/username.
