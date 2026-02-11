@@ -1,11 +1,11 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import ProductCard from "../components/ProductCard";
 import { getProducts } from "../services/fakeStoreApi";
 
 function formatCategoryLabel(category) {
-  return category
+  return (category || "")
     .split(" ")
     .map((word) => word[0]?.toUpperCase() + word.slice(1))
     .join(" ");
@@ -13,6 +13,7 @@ function formatCategoryLabel(category) {
 
 export default function Home() {
   const [searchParams, setSearchParams] = useSearchParams();
+
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const filtersPanelOpen = searchParams.get("filters") === "open";
 
@@ -45,8 +46,11 @@ export default function Home() {
       list = list.filter((product) => product.category === activeCategory);
     }
 
-    list = list.filter((product) => product.price >= minPrice && product.price <= maxPrice);
+    list = list.filter(
+      (product) => product.price >= minPrice && product.price <= maxPrice
+    );
 
+    // Tags "UI" (simuladas)
     if (activeTag === "new") {
       list = [...list].sort((a, b) => b.id - a.id).slice(0, 8);
     }
@@ -60,15 +64,28 @@ export default function Home() {
 
   const setParam = (key, value) => {
     const next = new URLSearchParams(searchParams);
-    if (!value && value !== 0) next.delete(key);
+
+    if (value === "" || value === null || value === undefined) next.delete(key);
     else next.set(key, String(value));
+
     setSearchParams(next, { replace: true });
   };
 
   const setCategory = (category) => {
     const next = new URLSearchParams(searchParams);
+
     if (!category) next.delete("category");
     else next.set("category", category);
+
+    setSearchParams(next, { replace: true });
+  };
+
+  const setTag = (tag) => {
+    const next = new URLSearchParams(searchParams);
+
+    if (!tag) next.delete("tag");
+    else next.set("tag", tag);
+
     setSearchParams(next, { replace: true });
   };
 
@@ -78,6 +95,8 @@ export default function Home() {
     next.delete("min");
     next.delete("max");
     next.delete("q");
+    next.delete("tag");
+    next.delete("filters");
     setSearchParams(next, { replace: true });
   };
 
@@ -87,96 +106,137 @@ export default function Home() {
     setSearchParams(next, { replace: true });
   };
 
+  const showFilters = mobileFiltersOpen || filtersPanelOpen;
+
   if (isLoading) return <p className="text-gray-600">Cargando productos...</p>;
   if (error) return <p className="text-red-600">Error cargando productos</p>;
 
   return (
-    <section className="space-y-6">
+    <section className="space-y-7">
+      {/* Intro */}
+      <div className="space-y-3">
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">
+          Home · Catálogo
+        </p>
+        <h1 className="text-4xl font-semibold tracking-tight text-gray-900">
+          New Arrivals
+        </h1>
+        <p className="max-w-2xl text-sm text-gray-600">
+          Explora una selección de productos inspirada en el estilo minimal, con
+          layout limpio y navegación por filtros rápidos.
+        </p>
+      </div>
+
+      {/* Toggle filtros en móvil */}
       <div className="lg:hidden">
         <button
           type="button"
           onClick={() => setMobileFiltersOpen((prev) => !prev)}
           className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-left text-sm font-medium text-gray-800"
         >
-          {mobileFiltersOpen || filtersPanelOpen ? "Ocultar búsqueda y filtros" : "Mostrar búsqueda y filtros"}
+          {showFilters ? "Ocultar búsqueda y filtros" : "Mostrar búsqueda y filtros"}
         </button>
       </div>
 
-          <div>
-            <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">Rango de precio</h3>
-            <div className="mt-4 space-y-3">
-              <label className="flex items-center justify-between gap-2 text-xs text-gray-500">
-                Min
-                <input
-                  type="number"
-                  min="0"
-                  value={minPrice}
-                  onChange={(e) => setParam("min", Math.max(0, Number(e.target.value || 0)))}
-                  className="w-24 rounded-lg border border-gray-200 px-2 py-1 text-sm text-gray-700"
-                />
-              </label>
-
-              <label className="flex items-center justify-between gap-2 text-xs text-gray-500">
-                Max
-                <input
-                  type="number"
-                  min="0"
-                  value={maxPrice}
-                  onChange={(e) => setParam("max", Math.max(0, Number(e.target.value || 0)))}
-                  className="w-24 rounded-lg border border-gray-200 px-2 py-1 text-sm text-gray-700"
-                />
-              </label>
-            </div>
-          </div>
-
-          <ul className="grid grid-cols-3 gap-3">
-            {filtered.map((product) => (
-              <li key={product.id}>
-                <ProductCard product={product} compact />
-              </li>
-            ))}
-          </ul>
-        </div>
-      </aside>
-
+      {/* Layout */}
+      <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
+        {/* Sidebar filtros */}
         <aside
           className={[
-            "order-1 rounded-2xl border border-gray-200 bg-white p-5 lg:sticky lg:top-28 lg:h-fit",
-            !mobileFiltersOpen && !filtersPanelOpen ? "hidden lg:hidden" : "block",
+            "rounded-2xl border border-gray-200 bg-white p-5 lg:sticky lg:top-24 lg:h-fit",
+            showFilters ? "block" : "hidden lg:block",
           ].join(" ")}
         >
+          {/* En móvil, si vienes de ?filters=open, permitimos cerrar */}
+          {filtersPanelOpen && (
+            <div className="mb-4 lg:hidden">
+              <button
+                type="button"
+                onClick={closeFiltersPanel}
+                className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              >
+                Cerrar panel
+              </button>
+            </div>
+          )}
+
           <div className="space-y-6">
+            {/* Search */}
             <div>
-              <h2 className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">Buscar</h2>
+              <h2 className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">
+                Buscar
+              </h2>
               <div className="mt-3">
                 <input
                   type="text"
-                  value={q}
+                  value={searchParams.get("q") || ""}
                   onChange={(e) => setParam("q", e.target.value)}
                   placeholder="Buscar productos..."
-                  className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-800 outline-none"
+                  className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-800 outline-none transition focus:border-gray-400"
                 />
               </div>
             </div>
 
+            {/* Tags */}
             <div>
-              <h2 className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">Categorías</h2>
+              <h2 className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">
+                Destacados
+              </h2>
+              <div className="mt-4 grid gap-2">
+                <button
+                  type="button"
+                  onClick={() => setTag(activeTag === "new" ? "" : "new")}
+                  className={[
+                    "rounded-lg border px-3 py-2 text-left text-sm font-medium transition",
+                    activeTag === "new"
+                      ? "border-gray-900 bg-gray-900 text-white"
+                      : "border-gray-200 text-gray-700 hover:bg-gray-50",
+                  ].join(" ")}
+                >
+                  New
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setTag(activeTag === "sale" ? "" : "sale")}
+                  className={[
+                    "rounded-lg border px-3 py-2 text-left text-sm font-medium transition",
+                    activeTag === "sale"
+                      ? "border-gray-900 bg-gray-900 text-white"
+                      : "border-gray-200 text-gray-700 hover:bg-gray-50",
+                  ].join(" ")}
+                >
+                  Sale
+                </button>
+              </div>
+            </div>
+
+            {/* Categories */}
+            <div>
+              <h2 className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">
+                Categorías
+              </h2>
               <div className="mt-4 grid gap-2">
                 <button
                   type="button"
                   onClick={() => setCategory("")}
                   className={[
                     "rounded-lg border px-3 py-2 text-left text-sm font-medium transition",
-                    !activeCategory ? "border-gray-900 bg-gray-900 text-white" : "border-gray-200 text-gray-700 hover:bg-gray-50",
+                    !activeCategory
+                      ? "border-gray-900 bg-gray-900 text-white"
+                      : "border-gray-200 text-gray-700 hover:bg-gray-50",
                   ].join(" ")}
                 >
                   Todas
                 </button>
+
                 {categories.map((category) => (
                   <button
                     key={category}
                     type="button"
-                    onClick={() => setCategory(activeCategory === category ? "" : category)}
+                    onClick={() =>
+                      setCategory(activeCategory === category ? "" : category)
+                    }
                     className={[
                       "rounded-lg border px-3 py-2 text-left text-sm font-medium transition",
                       activeCategory === category
@@ -190,16 +250,21 @@ export default function Home() {
               </div>
             </div>
 
+            {/* Price */}
             <div>
-              <h2 className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">Price Range</h2>
+              <h2 className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">
+                Rango de precio
+              </h2>
               <div className="mt-4 space-y-3">
                 <label className="flex items-center justify-between gap-2 text-xs text-gray-500">
                   Min
                   <input
                     type="number"
                     min="0"
-                    value={minPrice}
-                    onChange={(e) => setParam("min", Math.max(0, Number(e.target.value || 0)))}
+                    value={Number.isFinite(minPrice) ? minPrice : 0}
+                    onChange={(e) =>
+                      setParam("min", Math.max(0, Number(e.target.value || 0)))
+                    }
                     className="w-24 rounded-lg border border-gray-200 px-2 py-1 text-sm text-gray-700"
                   />
                 </label>
@@ -209,8 +274,10 @@ export default function Home() {
                   <input
                     type="number"
                     min="0"
-                    value={maxPrice}
-                    onChange={(e) => setParam("max", Math.max(0, Number(e.target.value || 0)))}
+                    value={Number.isFinite(maxPrice) ? maxPrice : 1000}
+                    onChange={(e) =>
+                      setParam("max", Math.max(0, Number(e.target.value || 0)))
+                    }
                     className="w-24 rounded-lg border border-gray-200 px-2 py-1 text-sm text-gray-700"
                   />
                 </label>
@@ -227,22 +294,24 @@ export default function Home() {
           </div>
         </aside>
 
-        <div className="space-y-4 order-2 lg:order-2">
+        {/* Main */}
+        <main className="space-y-4">
           <div className="flex items-center justify-between rounded-2xl border border-gray-200 bg-white px-4 py-3">
             <p className="text-sm text-gray-500">
-              Showing <span className="font-semibold text-gray-900">{filtered.length}</span> products
+              Showing{" "}
+              <span className="font-semibold text-gray-900">{filtered.length}</span>{" "}
+              products
             </p>
           </div>
 
-          <ul className="grid grid-cols-1 gap-3 2xl:grid-cols-2">
+          <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filtered.map((product) => (
               <li key={product.id}>
-                <ProductCard product={product} compact />
+                <ProductCard product={product} />
               </li>
             ))}
           </ul>
-        </div>
-
+        </main>
       </div>
     </section>
   );
