@@ -1,1 +1,2 @@
+cd C:\Users\javie\Desktop\Read\Proyecto_2ev
 npm run dev
