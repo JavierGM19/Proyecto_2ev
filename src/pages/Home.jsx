@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import ProductCard from "../components/ProductCard";
@@ -13,7 +13,7 @@ function formatCategoryLabel(category) {
 
 export default function Home() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const filtersPanelOpen = searchParams.get("filters") === "open";
 
   const q = (searchParams.get("q") || "").trim().toLowerCase();
   const activeCategory = searchParams.get("category") || "";
@@ -57,8 +57,6 @@ export default function Home() {
     return list;
   }, [activeCategory, activeTag, data, maxPrice, minPrice, q]);
 
-  const heroProduct = filtered[0] || data?.[0];
-
   const setParam = (key, value) => {
     const next = new URLSearchParams(searchParams);
     if (!value && value !== 0) next.delete(key);
@@ -66,9 +64,9 @@ export default function Home() {
     setSearchParams(next, { replace: true });
   };
 
-  const toggleCategory = (category) => {
+  const setCategory = (category) => {
     const next = new URLSearchParams(searchParams);
-    if (activeCategory === category) next.delete("category");
+    if (!category) next.delete("category");
     else next.set("category", category);
     setSearchParams(next, { replace: true });
   };
@@ -78,6 +76,13 @@ export default function Home() {
     next.delete("category");
     next.delete("min");
     next.delete("max");
+    next.delete("q");
+    setSearchParams(next, { replace: true });
+  };
+
+  const closeFiltersPanel = () => {
+    const next = new URLSearchParams(searchParams);
+    next.delete("filters");
     setSearchParams(next, { replace: true });
   };
 
@@ -86,113 +91,126 @@ export default function Home() {
 
   return (
     <section className="space-y-6">
-      <div className="rounded-3xl border border-gray-200 bg-white p-6 md:p-9">
-        <div className="grid gap-8 md:grid-cols-[1.3fr_1fr] md:items-center">
-          <div className="space-y-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">New Collection</p>
-            <h1 className="text-4xl font-bold tracking-tight text-gray-900 md:text-6xl">New Arrivals</h1>
-            <p className="max-w-xl text-base text-gray-600">
-              Explore our curated selection of high-quality essentials designed to elevate your daily rotation.
-            </p>
-          </div>
-
-          <div className="flex items-center justify-center rounded-2xl bg-gray-50 p-6">
-            {heroProduct ? (
-              <img src={heroProduct.image} alt={heroProduct.title} className="h-56 w-full object-contain md:h-72" />
-            ) : (
-              <div className="h-56 w-full rounded-xl bg-gray-100" />
-            )}
-          </div>
-        </div>
-      </div>
-
-      <div className="lg:hidden">
+      {filtersPanelOpen && (
         <button
           type="button"
-          onClick={() => setMobileFiltersOpen((prev) => !prev)}
-          className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-left text-sm font-medium text-gray-800"
-        >
-          {mobileFiltersOpen ? "Ocultar filtros" : "Mostrar filtros"}
-        </button>
-      </div>
+          aria-label="Cerrar panel de filtros"
+          onClick={closeFiltersPanel}
+          className="fixed inset-0 z-30 bg-black/20"
+        />
+      )}
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_280px] xl:grid-cols-[1fr_300px]">
-        <div className="space-y-4 order-2 lg:order-1">
-          <div className="flex items-center justify-between rounded-2xl border border-gray-200 bg-white px-4 py-3">
-            <p className="text-sm text-gray-500">
-              Showing <span className="font-semibold text-gray-900">{filtered.length}</span> products
-            </p>
-          </div>
-
-          <ul className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
-            {filtered.map((product) => (
-              <li key={product.id}>
-                <ProductCard product={product} compact />
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <aside
-          className={[
-            "order-1 rounded-2xl border border-gray-200 bg-white p-5 lg:order-2 lg:sticky lg:top-24 lg:h-fit",
-            !mobileFiltersOpen ? "hidden lg:block" : "block",
-          ].join(" ")}
-        >
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">Categories</h2>
-              <div className="mt-4 space-y-2">
-                {categories.map((category) => (
-                  <label key={category} className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
-                    <input
-                      type="checkbox"
-                      checked={activeCategory === category}
-                      onChange={() => toggleCategory(category)}
-                      className="h-4 w-4 rounded border-gray-300"
-                    />
-                    <span>{formatCategoryLabel(category)}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <h2 className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">Price Range</h2>
-              <div className="mt-4 space-y-3">
-                <label className="flex items-center justify-between gap-2 text-xs text-gray-500">
-                  Min
-                  <input
-                    type="number"
-                    min="0"
-                    value={minPrice}
-                    onChange={(e) => setParam("min", Math.max(0, Number(e.target.value || 0)))}
-                    className="w-24 rounded-lg border border-gray-200 px-2 py-1 text-sm text-gray-700"
-                  />
-                </label>
-
-                <label className="flex items-center justify-between gap-2 text-xs text-gray-500">
-                  Max
-                  <input
-                    type="number"
-                    min="0"
-                    value={maxPrice}
-                    onChange={(e) => setParam("max", Math.max(0, Number(e.target.value || 0)))}
-                    className="w-24 rounded-lg border border-gray-200 px-2 py-1 text-sm text-gray-700"
-                  />
-                </label>
-              </div>
-            </div>
-
+      <aside
+        className={[
+          "fixed left-0 top-0 z-40 h-dvh w-[320px] border-r border-gray-200 bg-white p-5 shadow-xl transition-transform duration-300",
+          filtersPanelOpen ? "translate-x-0" : "-translate-x-full",
+        ].join(" ")}
+      >
+        <div className="flex h-full flex-col gap-6 overflow-y-auto pt-24">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">Buscar y filtrar</h2>
             <button
               type="button"
-              onClick={clearFilters}
-              className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              onClick={closeFiltersPanel}
+              className="rounded-md px-2 py-1 text-sm text-gray-600 hover:bg-gray-100"
             >
-              Limpiar filtros
+              Cerrar
             </button>
           </div>
-        </aside>
+
+          <div>
+            <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">Buscar</label>
+            <input
+              type="text"
+              value={q}
+              onChange={(e) => setParam("q", e.target.value)}
+              placeholder="Buscar productos..."
+              className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-800 outline-none"
+            />
+          </div>
+
+          <div>
+            <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">Categorías</h3>
+            <div className="mt-4 grid gap-2">
+              <button
+                type="button"
+                onClick={() => setCategory("")}
+                className={[
+                  "rounded-lg border px-3 py-2 text-left text-sm font-medium transition",
+                  !activeCategory ? "border-gray-900 bg-gray-900 text-white" : "border-gray-200 text-gray-700 hover:bg-gray-50",
+                ].join(" ")}
+              >
+                Todas
+              </button>
+              {categories.map((category) => (
+                <button
+                  key={category}
+                  type="button"
+                  onClick={() => setCategory(activeCategory === category ? "" : category)}
+                  className={[
+                    "rounded-lg border px-3 py-2 text-left text-sm font-medium transition",
+                    activeCategory === category
+                      ? "border-gray-900 bg-gray-900 text-white"
+                      : "border-gray-200 text-gray-700 hover:bg-gray-50",
+                  ].join(" ")}
+                >
+                  {formatCategoryLabel(category)}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">Rango de precio</h3>
+            <div className="mt-4 space-y-3">
+              <label className="flex items-center justify-between gap-2 text-xs text-gray-500">
+                Min
+                <input
+                  type="number"
+                  min="0"
+                  value={minPrice}
+                  onChange={(e) => setParam("min", Math.max(0, Number(e.target.value || 0)))}
+                  className="w-24 rounded-lg border border-gray-200 px-2 py-1 text-sm text-gray-700"
+                />
+              </label>
+
+              <label className="flex items-center justify-between gap-2 text-xs text-gray-500">
+                Max
+                <input
+                  type="number"
+                  min="0"
+                  value={maxPrice}
+                  onChange={(e) => setParam("max", Math.max(0, Number(e.target.value || 0)))}
+                  className="w-24 rounded-lg border border-gray-200 px-2 py-1 text-sm text-gray-700"
+                />
+              </label>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={clearFilters}
+            className="mt-auto w-full rounded-xl border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          >
+            Limpiar filtros
+          </button>
+        </div>
+      </aside>
+
+      <div className="space-y-4">
+        <div className="flex items-center justify-between rounded-2xl border border-gray-200 bg-white px-4 py-3">
+          <p className="text-sm text-gray-500">
+            Showing <span className="font-semibold text-gray-900">{filtered.length}</span> products
+          </p>
+        </div>
+
+        <ul className="grid grid-cols-1 gap-3 2xl:grid-cols-2">
+          {filtered.map((product) => (
+            <li key={product.id}>
+              <ProductCard product={product} compact />
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
   );
