@@ -102,7 +102,7 @@ export default function Home() {
             </p>
           </div>
 
-          <ul className="grid grid-cols-1 gap-3 2xl:grid-cols-2">
+          <ul className="grid grid-cols-3 gap-3">
             {filtered.map((product) => (
               <li key={product.id}>
                 <ProductCard product={product} compact />
