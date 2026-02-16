@@ -8,25 +8,25 @@ const ROLES_API_URL = "http://localhost:4000/role";
 export default function Login() {
     const navigate = useNavigate();
 
-    // Auth store
     const setSession = useAuthStore((s) => s.setSession);
     const isLogged = useAuthStore((s) => s.isLogged);
     const roleStored = useAuthStore((s) => s.role);
 
-    // Form state
-    const [username, setUsername] = useState("");
+    // Usuario admin real de FakeStore
+    const [username, setUsername] = useState("mor_2314");
     const [password, setPassword] = useState("");
 
-    // UI state
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
-    // Si ya hay sesión, fuera de /login
     useEffect(() => {
         if (!isLogged) return;
 
-        if (roleStored === "admin") navigate("/admin", { replace: true });
-        else navigate("/", { replace: true });
+        if (roleStored?.toLowerCase() === "admin") {
+            navigate("/admin", { replace: true });
+        } else {
+            navigate("/", { replace: true });
+        }
     }, [isLogged, roleStored, navigate]);
 
     async function handleSubmit(e) {
@@ -36,30 +36,37 @@ export default function Login() {
 
         try {
             const cleanUsername = username.trim();
-            const data = await login(cleanUsername, password); // Login Fake Store API
 
+            // 1️⃣ Login FakeStore
+            const data = await login(cleanUsername, password);
+
+            // 2️⃣ Obtener rol desde tu API
             let role = "user";
 
-            try {
-                const roleResponse = await fetch(ROLES_API_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ username: cleanUsername }),
-                });
+            const roleResponse = await fetch(ROLES_API_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username: cleanUsername }),
+            });
 
-                if (roleResponse.ok) {
-                    const roleData = await roleResponse.json();
-                    role = roleData?.role || "user";
-                }
-            } catch {
-                role = "user";
+            if (roleResponse.ok) {
+                const roleData = await roleResponse.json();
+                role = roleData?.role || "user";
             }
 
-            setSession({ token: data.token, role, username: cleanUsername });
+            // 3️⃣ Guardar sesión
+            setSession({
+                token: data.token,
+                role,
+                username: cleanUsername,
+            });
 
-            // Redirección según rol
-            if (role === "admin") navigate("/admin", { replace: true });
-            else navigate("/", { replace: true });
+            // 4️⃣ Redirigir según rol
+            if (role?.toLowerCase() === "admin") {
+                navigate("/admin", { replace: true });
+            } else {
+                navigate("/", { replace: true });
+            }
         } catch (err) {
             setError(err?.message || "Error al iniciar sesión");
         } finally {
@@ -77,7 +84,6 @@ export default function Login() {
                     placeholder="username"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    autoComplete="username"
                 />
 
                 <input
@@ -86,7 +92,6 @@ export default function Login() {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    autoComplete="current-password"
                 />
 
                 <button className="border p-2" disabled={loading}>
@@ -96,7 +101,7 @@ export default function Login() {
                 {error && <p className="text-red-600">{error}</p>}
 
                 <p className="text-sm text-gray-600">
-                    Prueba FakeStore (demo): <br />
+                    Usuario ADMIN de ejemplo: <br />
                     username: <b>mor_2314</b> <br />
                     password: <b>83r5^_</b>
                 </p>
