@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { login } from "../services/fakeStoreApi";
 import { useAuthStore } from "../store/authStore";
@@ -6,106 +6,66 @@ import { useAuthStore } from "../store/authStore";
 const ROLES_API_URL = "http://localhost:4000/role";
 
 export default function Login() {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+  const setSession = useAuthStore((s) => s.setSession);
 
-    const setSession = useAuthStore((s) => s.setSession);
-    const isLogged = useAuthStore((s) => s.isLogged);
-    const roleStored = useAuthStore((s) => s.role);
+  const [username, setUsername] = useState("mor_2314");
+  const [password, setPassword] = useState("83r5^_");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-    // Usuario admin real de FakeStore
-    const [username, setUsername] = useState("mor_2314");
-    const [password, setPassword] = useState("");
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
 
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("");
+    try {
+      const cleanUsername = username.trim();
+      const auth = await login(cleanUsername, password);
 
-    useEffect(() => {
-        if (!isLogged) return;
+      const roleResponse = await fetch(ROLES_API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: cleanUsername }),
+      });
 
-        if (roleStored?.toLowerCase() === "admin") {
-            navigate("/admin", { replace: true });
-        } else {
-            navigate("/", { replace: true });
-        }
-    }, [isLogged, roleStored, navigate]);
+      const roleData = roleResponse.ok ? await roleResponse.json() : { role: "user" };
 
-    async function handleSubmit(e) {
-        e.preventDefault();
-        setError("");
-        setLoading(true);
+      setSession({
+        token: auth.token,
+        username: cleanUsername,
+        role: roleData.role || "user",
+      });
 
-        try {
-            const cleanUsername = username.trim();
-
-            // 1️⃣ Login FakeStore
-            const data = await login(cleanUsername, password);
-
-            // 2️⃣ Obtener rol desde tu API
-            let role = "user";
-
-            const roleResponse = await fetch(ROLES_API_URL, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username: cleanUsername }),
-            });
-
-            if (roleResponse.ok) {
-                const roleData = await roleResponse.json();
-                role = roleData?.role || "user";
-            }
-
-            // 3️⃣ Guardar sesión
-            setSession({
-                token: data.token,
-                role,
-                username: cleanUsername,
-            });
-
-            // 4️⃣ Redirigir según rol
-            if (role?.toLowerCase() === "admin") {
-                navigate("/admin", { replace: true });
-            } else {
-                navigate("/", { replace: true });
-            }
-        } catch (err) {
-            setError(err?.message || "Error al iniciar sesión");
-        } finally {
-            setLoading(false);
-        }
+      navigate("/");
+    } catch (err) {
+      setError(err?.message || "No se pudo iniciar sesión");
+    } finally {
+      setLoading(false);
     }
+  }
 
-    return (
-        <div className="max-w-sm">
-            <h1 className="text-2xl font-bold mb-4">Login</h1>
+  return (
+    <section className="auth-box">
+      <h1>Iniciar sesión</h1>
 
-            <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-                <input
-                    className="border p-2"
-                    placeholder="username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                />
+      <form onSubmit={handleSubmit} className="auth-form">
+        <label>
+          Usuario
+          <input value={username} onChange={(e) => setUsername(e.target.value)} />
+        </label>
 
-                <input
-                    className="border p-2"
-                    placeholder="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                />
+        <label>
+          Contraseña
+          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+        </label>
 
-                <button className="border p-2" disabled={loading}>
-                    {loading ? "Entrando..." : "Entrar"}
-                </button>
+        <button type="submit" disabled={loading} className="btn-primary">
+          {loading ? "Entrando..." : "Entrar"}
+        </button>
 
-                {error && <p className="text-red-600">{error}</p>}
-
-                <p className="text-sm text-gray-600">
-                    Usuario ADMIN de ejemplo: <br />
-                    username: <b>mor_2314</b> <br />
-                    password: <b>83r5^_</b>
-                </p>
-            </form>
-        </div>
-    );
+        {error && <p className="error">{error}</p>}
+      </form>
+    </section>
+  );
 }
