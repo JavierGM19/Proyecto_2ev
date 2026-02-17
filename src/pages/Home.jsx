@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import ProductCard from "../components/ProductCard";
 import { getProducts } from "../services/fakeStoreApi";
-import { translateApiTerm } from "../i18n/apiDictionary";
 
 export default function Home() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -49,12 +48,12 @@ export default function Home() {
       <div className="category-list">
         {categories.map((cat) => (
           <button
-            key={translateApiTerm(cat)}
+            key={cat}
             type="button"
             onClick={() => handleCategoryChange(cat)}
             className={cat === category ? "active" : ""}
           >
-            {translateApiTerm(cat)}
+            {cat}
           </button>
         ))}
       </div>
