@@ -151,7 +151,7 @@ export default function Header() {
               <img
                 src={loginImage}
                 alt="login"
-                className="h-7 w-7 object-contain"
+                className="h-6 w-6 object-contain"
                 draggable="false"
               />
               <span className="hidden text-xs font-medium sm:inline">
@@ -168,7 +168,7 @@ export default function Header() {
               <img
                 src={carritoPng}
                 alt="carrito"
-                className="h-7 w-7 object-contain"
+                className="h-6 w-6 object-contain"
                 draggable="false"
               />
 
