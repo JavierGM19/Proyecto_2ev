@@ -2,6 +2,7 @@ import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getProductById } from "../services/fakeStoreApi";
 import { useCartStore } from "../store/cartStore";
+import { translateApiTerm } from "../i18n/apiDictionary";
 
 export default function ProductosDetail() {
   const { id } = useParams();
