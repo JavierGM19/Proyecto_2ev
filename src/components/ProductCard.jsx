@@ -9,7 +9,7 @@ export default function ProductCard({ product }) {
           <img src={product.image} alt={product.title} className="product-image" loading="lazy" />
         </div>
 
-        <p className="product-category">{translateApiTerm(product.category)}</p>
+        <p className="product-category">{product.category}</p>
         <h3 className="product-title">{product.title}</h3>
         <p className="product-price">{product.price} €</p>
       </Link>

@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import ProductCard from "../components/ProductCard";
 import { getProducts } from "../services/fakeStoreApi";
-import { isApiTermTranslated, translateApiTerm } from "../i18n/apiDictionary";
 
 export default function Home() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -28,10 +27,6 @@ export default function Home() {
       return sameCategory && sameText;
     });
   }, [data, category, queryText]);
-
-  const untranslatedTerms = useMemo(() => {
-    return categories.filter((term) => term !== "all" && !isApiTermTranslated(term));
-  }, [categories]);
 
   function handleCategoryChange(nextCategory) {
     const next = new URLSearchParams(searchParams);
@@ -58,16 +53,10 @@ export default function Home() {
             onClick={() => handleCategoryChange(cat)}
             className={cat === category ? "active" : ""}
           >
-            {translateApiTerm(cat)}
+            {cat}
           </button>
         ))}
       </div>
-
-      {untranslatedTerms.length > 0 && (
-        <p className="error">
-          Faltan traducciones en diccionario para: {untranslatedTerms.join(", ")}
-        </p>
-      )}
 
       <div className="products-grid">
         {filteredProducts.map((product) => (

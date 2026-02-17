@@ -25,7 +25,7 @@ export default function ProductosDetail() {
 
       <div>
         <h1>{data.title}</h1>
-        <p className="product-category">{translateApiTerm(data.category)}</p>
+        <p className="product-category">{data.category}</p>
         <p className="product-price">{data.price} €</p>
         <p>{data.description}</p>
 

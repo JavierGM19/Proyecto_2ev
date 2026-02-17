@@ -1,6 +1,5 @@
 // Diccionario editable para términos que llegan desde APIs.
 // Formato mental: [termino-api] -> traducción
-// Ejemplo: "men's clothing" -> "Ropa de hombre"
 
 export const API_DICTIONARY = {
   // FakeStore categorías
@@ -18,22 +17,9 @@ export const API_DICTIONARY = {
   admin: "Administrador",
 };
 
-function normalizeApiKey(value) {
-  return String(value)
-    .trim()
-    .toLowerCase()
-    .replace(/[’`´]/g, "'")
-    .replace(/\s+/g, " ");
-}
-
 export function translateApiTerm(value) {
   if (value === null || value === undefined) return "";
 
-  const key = normalizeApiKey(value);
+  const key = String(value).trim().toLowerCase();
   return API_DICTIONARY[key] || String(value);
-}
-
-export function isApiTermTranslated(value) {
-  if (value === null || value === undefined) return true;
-  return translateApiTerm(value) !== String(value);
 }

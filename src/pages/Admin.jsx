@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { translateApiTerm } from "../i18n/apiDictionary";
 
 const API_BASE = "http://localhost:4000";
 
@@ -56,7 +55,7 @@ export default function Admin() {
         {users.map((user) => (
           <article key={user.username} className="admin-card">
             <p><strong>{user.username}</strong></p>
-            <p>Rol actual: {translateApiTerm(user.role)}</p>
+            <p>Rol actual: {user.role}</p>
 
             <select value={user.role} onChange={(e) => updateRole(user.username, e.target.value)}>
               <option value="guest">Invitado</option>
