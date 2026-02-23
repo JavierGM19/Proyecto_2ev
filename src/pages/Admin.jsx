@@ -20,7 +20,7 @@ export default function Admin() {
       const apiUsers = await fetchUsers();
       setUsers(apiUsers);
     } catch (err) {
-      setError(err?.message || "Error");
+      setError(err?.message || "Error cargando usuarios");
     } finally {
       setLoading(false);
     }
