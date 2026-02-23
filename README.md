@@ -36,3 +36,19 @@ Los usuarios se guardan en el fichero JSON del backend:
 - `src/roles-api/src/data/users.json`
 
 Así los registros no dependen de `localStorage` del navegador.
+
+### Si aparece “No se pudo conectar con la API de roles”
+
+Comprueba estas causas típicas:
+
+1. La API no está levantada:
+   - `cd src/roles-api`
+   - `npm install`
+   - `npm run start`
+2. La URL del frontend no coincide con la API:
+   - Por defecto se usa `http://localhost:4000`
+   - Puedes cambiarla con `VITE_ROLES_API_URL` en un `.env`
+3. CORS o red bloqueada:
+   - Verifica en consola del navegador si hay error CORS/Network
+4. Dependencias backend incompletas:
+   - Si falta `express`, reinstala dependencias en `src/roles-api`
