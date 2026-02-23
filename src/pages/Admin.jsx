@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-
-const API_BASE = "http://localhost:4000";
+import { getRegisteredUsers } from "../services/localAuth";
 
 export default function Admin() {
   const [users, setUsers] = useState([]);
@@ -12,10 +11,8 @@ export default function Admin() {
     setError("");
 
     try {
-      const res = await fetch(`${API_BASE}/users`);
-      if (!res.ok) throw new Error("No se pudieron cargar los usuarios");
-      const data = await res.json();
-      setUsers(data);
+      const allUsers = await getRegisteredUsers();
+      setUsers(allUsers);
     } catch (err) {
       setError(err?.message || "Error");
     } finally {
@@ -26,23 +23,6 @@ export default function Admin() {
   useEffect(() => {
     loadUsers();
   }, []);
-
-  async function updateRole(username, role) {
-    try {
-      const res = await fetch(`${API_BASE}/users/${encodeURIComponent(username)}/role`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role }),
-      });
-
-      if (!res.ok) throw new Error("No se pudo actualizar el rol");
-      const updated = await res.json();
-
-      setUsers((prev) => prev.map((user) => (user.username === updated.username ? updated : user)));
-    } catch (err) {
-      setError(err?.message || "Error");
-    }
-  }
 
   if (loading) return <p>Cargando usuarios...</p>;
 
@@ -55,13 +35,7 @@ export default function Admin() {
         {users.map((user) => (
           <article key={user.username} className="admin-card">
             <p><strong>{user.username}</strong></p>
-            <p>Rol actual: {user.role}</p>
-
-            <select value={user.role} onChange={(e) => updateRole(user.username, e.target.value)}>
-              <option value="guest">Invitado</option>
-              <option value="user">Usuario</option>
-              <option value="admin">Admin</option>
-            </select>
+            <p>Tipo de cuenta: {user.role}</p>
           </article>
         ))}
       </div>
