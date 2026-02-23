@@ -86,7 +86,7 @@ export default function Login() {
   }
 
   return (
-    <section className="auth-box">
+    <section className="auth-box mx-auto">
       <h1>Iniciar sesión</h1>
       <p>
         Admin maestro (FakeStore API): <strong>{MASTER_ADMIN.username}</strong> /
@@ -96,15 +96,20 @@ export default function Login() {
       <form onSubmit={handleSubmit} className="auth-form">
         <label>
           Usuario
-          <input value={username} onChange={(e) => setUsername(e.target.value)} />
+          <input className="form-control" value={username} onChange={(e) => setUsername(e.target.value)} />
         </label>
 
         <label>
           Contraseña
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+          <input
+            className="form-control"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
         </label>
 
-        <button type="submit" disabled={loading} className="btn-primary">
+        <button type="submit" disabled={loading} className="btn btn-primary">
           {loading ? "Entrando..." : "Entrar"}
         </button>
 
@@ -119,6 +124,7 @@ export default function Login() {
         <label>
           Nuevo usuario
           <input
+            className="form-control"
             value={registerUsername}
             onChange={(e) => setRegisterUsername(e.target.value)}
           />
@@ -127,6 +133,7 @@ export default function Login() {
         <label>
           Contraseña
           <input
+            className="form-control"
             type="password"
             value={registerPassword}
             onChange={(e) => setRegisterPassword(e.target.value)}
@@ -135,14 +142,14 @@ export default function Login() {
 
         <label>
           Tipo de cuenta
-          <select value={registerRole} onChange={(e) => setRegisterRole(e.target.value)}>
+          <select className="form-select" value={registerRole} onChange={(e) => setRegisterRole(e.target.value)}>
             <option value="user">Usuario</option>
             <option value="guest">Invitado</option>
             <option value="admin">Admin</option>
           </select>
         </label>
 
-        <button type="submit" disabled={registerLoading} className="btn-primary">
+        <button type="submit" disabled={registerLoading} className="btn btn-primary">
           {registerLoading ? "Guardando..." : "Registrar"}
         </button>
       </form>

@@ -56,7 +56,7 @@ export default function Admin() {
       {error && <p className="error">{error}</p>}
       {okMessage && <p className="ok-message">{okMessage}</p>}
 
-      <div className="admin-grid">
+      <div className="admin-grid row g-3">
         {users.map((user) => (
           <article key={user.username} className="admin-card">
             <p><strong>{user.username}</strong></p>
