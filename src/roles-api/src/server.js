@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 dotenv.config();
 
@@ -13,9 +14,11 @@ app.use(express.json());
 const PORT = process.env.PORT || 4000;
 const MASTER_ADMIN_USERNAME = "mor_2314";
 
-// --- Persistencia simple en JSON ---
-const DATA_DIR = path.resolve("src/data");
-const USERS_FILE = path.join(DATA_DIR, "users.json");
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Fichero JSON compartido en el frontend (src/data/localUsers.json)
+const USERS_FILE = path.resolve(__dirname, "../../data/localUsers.json");
 
 const DEFAULT_USERS = [
   { username: MASTER_ADMIN_USERNAME, password: "83r5^_", role: "admin" },
