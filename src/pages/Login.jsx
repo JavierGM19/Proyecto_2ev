@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { login as loginFakeStore } from "../services/fakeStoreApi";
 import { loginLocal, registerLocal } from "../services/localAuth";
+import { fetchRoleByUsername } from "../services/rolesApi";
 import { useAuthStore } from "../store/authStore";
 
 const MASTER_ADMIN = {
@@ -36,10 +37,11 @@ export default function Login() {
 
       if (cleanUsername === MASTER_ADMIN.username) {
         const apiAuth = await loginFakeStore(cleanUsername, password);
+        const apiRole = await fetchRoleByUsername(cleanUsername).catch(() => "admin");
         session = {
           token: apiAuth.token,
           username: cleanUsername,
-          role: "admin",
+          role: apiRole,
         };
       } else {
         session = loginLocal(cleanUsername, password);
