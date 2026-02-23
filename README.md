@@ -18,3 +18,21 @@ If you are developing a production application, we recommend using TypeScript wi
 ## API de roles local
 
 Guía rápida de uso/integración (API ya creada): `USO_API_ROLES.txt`.
+
+### Arranque rápido (frontend + backend)
+
+1. Frontend:
+   - `npm install`
+   - `npm run dev`
+2. Backend de roles (en otra terminal):
+   - `cd src/roles-api`
+   - `npm install`
+   - `npm run start`
+
+### Dónde se guardan los usuarios registrados
+
+Los usuarios se guardan en el fichero JSON del backend:
+
+- `src/roles-api/src/data/users.json`
+
+Así los registros no dependen de `localStorage` del navegador.
