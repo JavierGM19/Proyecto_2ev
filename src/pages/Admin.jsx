@@ -6,7 +6,15 @@ const MASTER_ADMIN_USERNAME = "mor_2314";
 export default function Admin() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [okMessage, setOkMessage] = useState("");
+  const [pendingRoles, setPendingRoles] = useState({});
+
+  const changedCount = useMemo(
+    () => Object.keys(pendingRoles).length,
+    [pendingRoles]
+  );
 
   async function loadUsers() {
     setLoading(true);
@@ -34,8 +42,21 @@ export default function Admin() {
 
   return (
     <section>
-      <h1>Panel de administración</h1>
+      <div className="admin-header">
+        <h1>Panel de administración</h1>
+        <button
+          type="button"
+          className="btn-primary"
+          disabled={!changedCount || saving}
+          onClick={handleSaveAll}
+        >
+          {saving ? "Guardando..." : "Guardar"}
+        </button>
+      </div>
+
+      {!!changedCount && <p>Cambios pendientes: {changedCount}</p>}
       {error && <p className="error">{error}</p>}
+      {okMessage && <p className="ok-message">{okMessage}</p>}
 
       <div className="admin-grid">
         {users.map((user) => (
