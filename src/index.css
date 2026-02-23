@@ -142,3 +142,37 @@ h1 { margin: 0 0 0.4rem; font-size: 1.8rem; }
   font-size: 0.9rem;
   color: #6b7280;
 }
+
+/* Breakpoints solicitados: 990px, 767px, 510px, 480px */
+@media (max-width: 990px) {
+  .container { width: min(940px, 94%); }
+  .header-row { flex-wrap: wrap; gap: 0.7rem; padding: 0.4rem 0; }
+  .search-form { order: 3; width: 100%; margin-left: 0; }
+  .search-form input { width: 100%; }
+}
+
+@media (max-width: 767px) {
+  h1 { font-size: 1.5rem; }
+  .menu { width: 100%; }
+  .header-actions { width: 100%; justify-content: space-between; }
+  .products-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+  .admin-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 510px) {
+  .main-content { padding: 0.8rem 0 1.2rem; }
+  .product-image-wrap { height: 140px; }
+  .detail-image-wrap { height: 220px; }
+  .auth-box, .admin-card { padding: 0.8rem; }
+}
+
+@media (max-width: 480px) {
+  .container { width: 96%; }
+  .brand { font-size: 1rem; }
+  .menu a { font-size: 0.88rem; }
+  .search-form button,
+  .header-actions button,
+  .category-list button,
+  .btn-primary,
+  select { font-size: 0.82rem; padding: 0.4rem 0.6rem; }
+}

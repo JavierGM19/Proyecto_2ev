@@ -46,25 +46,26 @@ export default function Header() {
             DAW Shop
           </Link>
 
-          <nav className="menu">
-            <NavLink to="/">Inicio</NavLink>
-            {role === "admin" && <NavLink to="/admin">Admin</NavLink>}
+          <nav className="menu nav">
+            <NavLink className="nav-link px-2" to="/">Inicio</NavLink>
+            {role === "admin" && <NavLink className="nav-link px-2" to="/admin">Admin</NavLink>}
           </nav>
 
           <form onSubmit={handleSearchSubmit} className="search-form">
             <input
+              className="form-control"
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
               placeholder="Buscar producto"
             />
-            <button type="submit">Buscar</button>
+            <button type="submit" className="btn btn-outline-secondary">Buscar</button>
           </form>
 
           <div className="header-actions">
-            <button type="button" onClick={() => setCartOpen(true)}>
+            <button type="button" className="btn btn-outline-dark" onClick={() => setCartOpen(true)}>
               🛒 <span>{cartCount}</span>
             </button>
-            <button type="button" onClick={handleLoginButton}>
+            <button type="button" className="btn btn-primary" onClick={handleLoginButton}>
               {isLogged ? "Salir" : "Entrar"}
             </button>
           </div>
