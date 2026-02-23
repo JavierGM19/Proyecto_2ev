@@ -42,7 +42,7 @@ export default function Login() {
           role: "admin",
         };
       } else {
-        session = loginLocal(cleanUsername, password);
+        session = await loginLocal(cleanUsername, password);
       }
 
       setSession(session);
@@ -66,7 +66,7 @@ export default function Login() {
     setRegisterLoading(true);
 
     try {
-      registerLocal({
+      await registerLocal({
         username: registerUsername,
         password: registerPassword,
         role: registerRole,

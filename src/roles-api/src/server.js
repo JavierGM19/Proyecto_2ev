@@ -21,13 +21,14 @@ const __dirname = path.dirname(__filename);
 const USERS_FILE = path.resolve(__dirname, "../../data/localUsers.json");
 
 const DEFAULT_USERS = [
-  { username: MASTER_ADMIN_USERNAME, password: "83r5^_", role: "admin" },
-  { username: "johnd", password: "m38rmF$", role: "user" },
-  { username: "guest_demo", password: "guest123", role: "guest" },
+  { username: "usuario", password: "usuario123", role: "user" },
+  { username: "invitado", password: "invitado123", role: "guest" },
 ];
 
 function ensureDataFile() {
-  if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+  const dir = path.dirname(USERS_FILE);
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+
   if (!fs.existsSync(USERS_FILE)) {
     fs.writeFileSync(USERS_FILE, JSON.stringify(DEFAULT_USERS, null, 2), "utf-8");
   }
@@ -36,7 +37,8 @@ function ensureDataFile() {
 function readUsers() {
   ensureDataFile();
   const raw = fs.readFileSync(USERS_FILE, "utf-8");
-  return JSON.parse(raw);
+  const parsed = JSON.parse(raw);
+  return Array.isArray(parsed) ? parsed : [...DEFAULT_USERS];
 }
 
 function writeUsers(users) {
@@ -58,22 +60,29 @@ function publicUser(user) {
 }
 
 app.get("/", (_req, res) => {
-  res.json({ ok: true, message: "roles-api running" });
+  res.json({ ok: true, message: "roles-api running", usersFile: USERS_FILE });
 });
 
 app.post("/role", (req, res) => {
   const { username } = req.body || {};
   if (!username) return res.status(400).json({ message: "Missing username" });
 
-  const users = readUsers();
-  const u = users.find((x) => x.username === username);
+  if (username === MASTER_ADMIN_USERNAME) {
+    return res.json({ role: "admin" });
+  }
 
-  return res.json({ role: u?.role || "user" });
+  const users = readUsers();
+  const user = users.find((item) => item.username === username);
+
+  return res.json({ role: user?.role || "user" });
 });
 
 app.get("/users", (_req, res) => {
   const users = readUsers().map(publicUser);
-  return res.json(users);
+  return res.json([
+    { username: MASTER_ADMIN_USERNAME, role: "admin" },
+    ...users,
+  ]);
 });
 
 app.post("/login-local", (req, res) => {
@@ -83,13 +92,15 @@ app.post("/login-local", (req, res) => {
     return res.status(400).json({ message: "Faltan usuario o contraseña" });
   }
 
-  if (username === MASTER_ADMIN_USERNAME) {
+  const cleanUsername = String(username).trim();
+
+  if (cleanUsername === MASTER_ADMIN_USERNAME) {
     return res.status(400).json({ message: "Este usuario se valida en FakeStore" });
   }
 
   const users = readUsers();
   const user = users.find(
-    (item) => item.username === username && item.password === password
+    (item) => item.username === cleanUsername && item.password === password
   );
 
   if (!user) {
@@ -105,23 +116,24 @@ app.post("/login-local", (req, res) => {
 
 app.post("/register", (req, res) => {
   const { username, password, role } = req.body || {};
+  const cleanUsername = String(username || "").trim();
 
-  if (!username || !password) {
+  if (!cleanUsername || !password) {
     return res.status(400).json({ message: "Usuario y contraseña son obligatorios" });
   }
 
-  if (username === MASTER_ADMIN_USERNAME) {
+  if (cleanUsername === MASTER_ADMIN_USERNAME) {
     return res.status(400).json({ message: "Ese usuario está reservado para el admin maestro" });
   }
 
   const safeRole = normalizeRole(role) || "user";
   const users = readUsers();
 
-  if (users.some((item) => item.username === username)) {
+  if (users.some((item) => item.username === cleanUsername)) {
     return res.status(400).json({ message: "Ese usuario ya existe" });
   }
 
-  const created = { username, password, role: safeRole };
+  const created = { username: cleanUsername, password, role: safeRole };
   users.push(created);
   writeUsers(users);
 
@@ -132,16 +144,22 @@ app.patch("/users/:username/role", (req, res) => {
   const { username } = req.params;
   const { role } = req.body || {};
 
+  const cleanUsername = String(username || "").trim();
+
+  if (cleanUsername === MASTER_ADMIN_USERNAME) {
+    return res.status(400).json({ message: "No se puede cambiar el rol del admin maestro" });
+  }
+
   const newRole = normalizeRole(role);
   if (!newRole) {
     return res.status(400).json({ message: "role must be: guest | user | admin" });
   }
 
   const users = readUsers();
-  const idx = users.findIndex((x) => x.username === username);
+  const idx = users.findIndex((item) => item.username === cleanUsername);
 
   if (idx === -1) {
-    const created = { username, password: "1234", role: newRole };
+    const created = { username: cleanUsername, password: "1234", role: newRole };
     users.push(created);
     writeUsers(users);
     return res.status(201).json(publicUser(created));
@@ -149,9 +167,11 @@ app.patch("/users/:username/role", (req, res) => {
 
   users[idx] = { ...users[idx], role: newRole };
   writeUsers(users);
+
   return res.json(publicUser(users[idx]));
 });
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Users JSON file: ${USERS_FILE}`);
 });

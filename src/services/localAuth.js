@@ -1,74 +1,75 @@
-import seedUsers from "../data/localUsers.json";
-
-const STORAGE_KEY = "daw-users-db";
+const API_BASE = "http://localhost:4000";
 const MASTER_ADMIN_USERNAME = "mor_2314";
 
-function readUsers() {
-  const raw = localStorage.getItem(STORAGE_KEY);
-
-  if (!raw) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(seedUsers));
-    return [...seedUsers];
-  }
-
-  try {
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [...seedUsers];
-  } catch {
-    return [...seedUsers];
-  }
-}
-
-function saveUsers(users) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
-}
-
-export function getRegisteredUsers() {
-  return readUsers();
-}
-
-export function loginLocal(username, password) {
-  const users = readUsers();
-  const cleanUsername = username.trim();
-
-  const user = users.find(
-    (item) => item.username === cleanUsername && item.password === password
-  );
-
-  if (!user) {
-    throw new Error("Credenciales incorrectas");
-  }
-
+function normalizeUser(user) {
   return {
-    token: `local-token-${user.username}`,
     username: user.username,
     role: user.role,
   };
 }
 
-export function registerLocal({ username, password, role }) {
-  const users = readUsers();
+export async function getRegisteredUsers() {
+  const res = await fetch(`${API_BASE}/users`);
+  if (!res.ok) {
+    throw new Error("No se pudieron cargar los usuarios");
+  }
+
+  const users = await res.json();
+  return users.map(normalizeUser);
+}
+
+export async function updateUserRole(username, role) {
+  const res = await fetch(`${API_BASE}/users/${encodeURIComponent(username)}/role`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ role }),
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data?.message || "No se pudo actualizar el rol");
+  }
+
+  return normalizeUser(data);
+}
+
+export async function loginLocal(username, password) {
   const cleanUsername = username.trim();
 
-  if (!cleanUsername || !password) {
-    throw new Error("Usuario y contraseña son obligatorios");
-  }
-
   if (cleanUsername === MASTER_ADMIN_USERNAME) {
-    throw new Error("Ese usuario está reservado para el admin maestro");
+    throw new Error("Este usuario se valida con FakeStore");
   }
 
-  if (users.some((item) => item.username === cleanUsername)) {
-    throw new Error("Ese usuario ya existe");
+  const res = await fetch(`${API_BASE}/login-local`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username: cleanUsername, password }),
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data?.message || "Credenciales incorrectas");
   }
 
-  const allowedRoles = ["user", "guest", "admin"];
-  const safeRole = allowedRoles.includes(role) ? role : "user";
+  return data;
+}
 
-  const nextUsers = [
-    ...users,
-    { username: cleanUsername, password, role: safeRole },
-  ];
+export async function registerLocal({ username, password, role }) {
+  const cleanUsername = username.trim();
 
-  saveUsers(nextUsers);
+  const res = await fetch(`${API_BASE}/register`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username: cleanUsername, password, role }),
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data?.message || "No se pudo registrar el usuario");
+  }
+
+  return normalizeUser(data);
 }
