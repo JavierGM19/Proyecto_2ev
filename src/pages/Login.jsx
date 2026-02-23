@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { login as loginFakeStore } from "../services/fakeStoreApi";
 import { loginLocal, registerLocal } from "../services/localAuth";
-import { fetchRoleByUsername, loginLocalApi, registerUserApi } from "../services/rolesApi";
+import { fetchRoleByUsername } from "../services/rolesApi";
 import { useAuthStore } from "../store/authStore";
 
 const MASTER_ADMIN = {
