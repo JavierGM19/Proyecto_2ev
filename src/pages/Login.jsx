@@ -2,12 +2,17 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { login as loginFakeStore } from "../services/fakeStoreApi";
 import { loginLocal, registerLocal } from "../services/localAuth";
+import { fetchRoleByUsername, loginLocalApi, registerUserApi } from "../services/rolesApi";
 import { useAuthStore } from "../store/authStore";
 
 const MASTER_ADMIN = {
   username: "mor_2314",
   password: "83r5^_",
 };
+
+function isRolesApiConnectionError(err) {
+  return err?.message?.includes("No se pudo conectar con la API de roles");
+}
 
 export default function Login() {
   const navigate = useNavigate();
@@ -36,13 +41,19 @@ export default function Login() {
 
       if (cleanUsername === MASTER_ADMIN.username) {
         const apiAuth = await loginFakeStore(cleanUsername, password);
+        const apiRole = await fetchRoleByUsername(cleanUsername).catch(() => "admin");
         session = {
           token: apiAuth.token,
           username: cleanUsername,
-          role: "admin",
+          role: apiRole,
         };
       } else {
-        session = loginLocal(cleanUsername, password);
+        try {
+          session = await loginLocalApi(cleanUsername, password);
+        } catch (err) {
+          if (!isRolesApiConnectionError(err)) throw err;
+          session = loginLocal(cleanUsername, password);
+        }
       }
 
       setSession(session);
@@ -66,11 +77,21 @@ export default function Login() {
     setRegisterLoading(true);
 
     try {
-      registerLocal({
-        username: registerUsername,
-        password: registerPassword,
-        role: registerRole,
-      });
+      try {
+        await registerUserApi({
+          username: registerUsername,
+          password: registerPassword,
+          role: registerRole,
+        });
+      } catch (err) {
+        if (!isRolesApiConnectionError(err)) throw err;
+
+        registerLocal({
+          username: registerUsername,
+          password: registerPassword,
+          role: registerRole,
+        });
+      }
 
       setOkMessage("Usuario registrado correctamente. Ya puedes iniciar sesión.");
       setRegisterUsername("");
@@ -84,7 +105,7 @@ export default function Login() {
   }
 
   return (
-    <section className="auth-box">
+    <section className="auth-box mx-auto">
       <h1>Iniciar sesión</h1>
       <p>
         Admin maestro (FakeStore API): <strong>{MASTER_ADMIN.username}</strong> /
@@ -94,15 +115,20 @@ export default function Login() {
       <form onSubmit={handleSubmit} className="auth-form">
         <label>
           Usuario
-          <input value={username} onChange={(e) => setUsername(e.target.value)} />
+          <input className="form-control" value={username} onChange={(e) => setUsername(e.target.value)} />
         </label>
 
         <label>
           Contraseña
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+          <input
+            className="form-control"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
         </label>
 
-        <button type="submit" disabled={loading} className="btn-primary">
+        <button type="submit" disabled={loading} className="btn btn-primary">
           {loading ? "Entrando..." : "Entrar"}
         </button>
 
@@ -117,6 +143,7 @@ export default function Login() {
         <label>
           Nuevo usuario
           <input
+            className="form-control"
             value={registerUsername}
             onChange={(e) => setRegisterUsername(e.target.value)}
           />
@@ -125,6 +152,7 @@ export default function Login() {
         <label>
           Contraseña
           <input
+            className="form-control"
             type="password"
             value={registerPassword}
             onChange={(e) => setRegisterPassword(e.target.value)}
@@ -133,14 +161,14 @@ export default function Login() {
 
         <label>
           Tipo de cuenta
-          <select value={registerRole} onChange={(e) => setRegisterRole(e.target.value)}>
+          <select className="form-select" value={registerRole} onChange={(e) => setRegisterRole(e.target.value)}>
             <option value="user">Usuario</option>
             <option value="guest">Invitado</option>
             <option value="admin">Admin</option>
           </select>
         </label>
 
-        <button type="submit" disabled={registerLoading} className="btn-primary">
+        <button type="submit" disabled={registerLoading} className="btn btn-primary">
           {registerLoading ? "Guardando..." : "Registrar"}
         </button>
       </form>
