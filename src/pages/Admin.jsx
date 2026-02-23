@@ -53,22 +53,13 @@ export default function Admin() {
   return (
     <section>
       <h1>Panel de administración</h1>
-      {error && (
-        <>
-          <p className="error">{error}</p>
-          <button type="button" className="btn-primary" onClick={loadUsers}>
-            Reintentar
-          </button>
-        </>
-      )}
+      {error && <p className="error">{error}</p>}
       {okMessage && <p className="ok-message">{okMessage}</p>}
 
       <div className="admin-grid">
         {users.map((user) => (
           <article key={user.username} className="admin-card">
-            <p>
-              <strong>{user.username}</strong>
-            </p>
+            <p><strong>{user.username}</strong></p>
             <label>
               Tipo de cuenta
               <select
