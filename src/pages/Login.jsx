@@ -10,6 +10,10 @@ const MASTER_ADMIN = {
   password: "83r5^_",
 };
 
+function isRolesApiConnectionError(err) {
+  return err?.message?.includes("No se pudo conectar con la API de roles");
+}
+
 export default function Login() {
   const navigate = useNavigate();
   const setSession = useAuthStore((s) => s.setSession);
@@ -44,7 +48,12 @@ export default function Login() {
           role: apiRole,
         };
       } else {
-        session = loginLocal(cleanUsername, password);
+        try {
+          session = await loginLocalApi(cleanUsername, password);
+        } catch (err) {
+          if (!isRolesApiConnectionError(err)) throw err;
+          session = loginLocal(cleanUsername, password);
+        }
       }
 
       setSession(session);
@@ -68,11 +77,21 @@ export default function Login() {
     setRegisterLoading(true);
 
     try {
-      registerLocal({
-        username: registerUsername,
-        password: registerPassword,
-        role: registerRole,
-      });
+      try {
+        await registerUserApi({
+          username: registerUsername,
+          password: registerPassword,
+          role: registerRole,
+        });
+      } catch (err) {
+        if (!isRolesApiConnectionError(err)) throw err;
+
+        registerLocal({
+          username: registerUsername,
+          password: registerPassword,
+          role: registerRole,
+        });
+      }
 
       setOkMessage("Usuario registrado correctamente. Ya puedes iniciar sesión.");
       setRegisterUsername("");
