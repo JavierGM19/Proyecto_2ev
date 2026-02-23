@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { getRegisteredUsers } from "../services/localAuth";
 
+const MASTER_ADMIN_USERNAME = "mor_2314";
+
 export default function Admin() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -11,7 +13,11 @@ export default function Admin() {
     setError("");
 
     try {
-      const allUsers = await getRegisteredUsers();
+      const localUsers = getRegisteredUsers();
+      const allUsers = [
+        { username: MASTER_ADMIN_USERNAME, role: "admin" },
+        ...localUsers,
+      ];
       setUsers(allUsers);
     } catch (err) {
       setError(err?.message || "Error");
