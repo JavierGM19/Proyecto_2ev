@@ -1,13 +1,18 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { login as loginFakeStore } from "../services/fakeStoreApi";
-import { fetchRoleByUsername, loginLocalApi, registerUserApi } from "../services/rolesApi";
+import { loginLocal, registerLocal } from "../services/localAuth";
+import { fetchRoleByUsername } from "../services/rolesApi";
 import { useAuthStore } from "../store/authStore";
 
 const MASTER_ADMIN = {
   username: "mor_2314",
   password: "83r5^_",
 };
+
+function isRolesApiConnectionError(err) {
+  return err?.message?.includes("No se pudo conectar con la API de roles");
+}
 
 export default function Login() {
   const navigate = useNavigate();
@@ -43,7 +48,12 @@ export default function Login() {
           role: apiRole,
         };
       } else {
-        session = await loginLocalApi(cleanUsername, password);
+        try {
+          session = await loginLocalApi(cleanUsername, password);
+        } catch (err) {
+          if (!isRolesApiConnectionError(err)) throw err;
+          session = loginLocal(cleanUsername, password);
+        }
       }
 
       setSession(session);
@@ -62,11 +72,21 @@ export default function Login() {
     setRegisterLoading(true);
 
     try {
-      await registerUserApi({
-        username: registerUsername,
-        password: registerPassword,
-        role: registerRole,
-      });
+      try {
+        await registerUserApi({
+          username: registerUsername,
+          password: registerPassword,
+          role: registerRole,
+        });
+      } catch (err) {
+        if (!isRolesApiConnectionError(err)) throw err;
+
+        registerLocal({
+          username: registerUsername,
+          password: registerPassword,
+          role: registerRole,
+        });
+      }
 
       setOkMessage("Usuario registrado correctamente en users.json. Ya puedes iniciar sesión.");
       setRegisterUsername("");

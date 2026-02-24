@@ -52,17 +52,3 @@ Comprueba estas causas típicas:
    - Verifica en consola del navegador si hay error CORS/Network
 4. Dependencias backend incompletas:
    - Si falta `express`, reinstala dependencias en `src/roles-api`
-
-
-5. Cambio importante respecto a versiones anteriores:
-   - Antes el panel admin podía leer usuarios locales sin backend.
-   - Ahora el panel de administración prioriza la API de roles (`/users` y `PATCH /users/:username/role`) para editar roles, y solo usa modo local como respaldo de lectura.
-
-### Responsive + Bootstrap
-
-- Se añadieron breakpoints explícitos para `990px`, `767px`, `510px` y `480px` en `src/index.css`.
-- Se incorporó Bootstrap 5 (CDN) en `index.html` y se usan clases Bootstrap en header/login/admin (`btn`, `form-control`, `form-select`, `alert`, `row`, `col-*`).
-
-### Registro de usuarios
-
-- El registro de usuarios desde la web usa `POST /register` de la roles-api; esos usuarios se guardan en `src/roles-api/src/data/users.json` (no en FakeStore).
