@@ -57,12 +57,7 @@ export default function Login() {
       }
 
       setSession(session);
-
-      if (session.role === "admin") {
-        navigate("/admin");
-      } else {
-        navigate("/");
-      }
+      navigate(session.role === "admin" ? "/admin" : "/");
     } catch (err) {
       setError(err?.message || "No se pudo iniciar sesión");
     } finally {
@@ -93,7 +88,7 @@ export default function Login() {
         });
       }
 
-      setOkMessage("Usuario registrado correctamente. Ya puedes iniciar sesión.");
+      setOkMessage("Usuario registrado correctamente en users.json. Ya puedes iniciar sesión.");
       setRegisterUsername("");
       setRegisterPassword("");
       setRegisterRole("user");
