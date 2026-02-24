@@ -1,8 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { login as loginFakeStore } from "../services/fakeStoreApi";
-import { loginLocal, registerLocal } from "../services/localAuth";
-import { fetchRoleByUsername } from "../services/rolesApi";
+import {
+  fetchRoleByUsername,
+  loginLocalApi,
+  registerApiUser,
+  registerUserApi,
+} from "../services/rolesApi";
 import { useAuthStore } from "../store/authStore";
 
 const MASTER_ADMIN = {
@@ -10,9 +14,12 @@ const MASTER_ADMIN = {
   password: "83r5^_",
 };
 
-function isRolesApiConnectionError(err) {
-  return err?.message?.includes("No se pudo conectar con la API de roles");
-}
+const registerUserFn =
+  typeof registerUserApi === "function"
+    ? registerUserApi
+    : typeof registerApiUser === "function"
+      ? registerApiUser
+      : null;
 
 export default function Login() {
   const navigate = useNavigate();
@@ -48,12 +55,7 @@ export default function Login() {
           role: apiRole,
         };
       } else {
-        try {
-          session = await loginLocalApi(cleanUsername, password);
-        } catch (err) {
-          if (!isRolesApiConnectionError(err)) throw err;
-          session = loginLocal(cleanUsername, password);
-        }
+        session = await loginLocalApi(cleanUsername, password);
       }
 
       setSession(session);
@@ -72,21 +74,15 @@ export default function Login() {
     setRegisterLoading(true);
 
     try {
-      try {
-        await registerUserApi({
-          username: registerUsername,
-          password: registerPassword,
-          role: registerRole,
-        });
-      } catch (err) {
-        if (!isRolesApiConnectionError(err)) throw err;
-
-        registerLocal({
-          username: registerUsername,
-          password: registerPassword,
-          role: registerRole,
-        });
+      if (!registerUserFn) {
+        throw new Error("registerUserApi no está disponible. Revisa src/services/rolesApi.js");
       }
+
+      await registerUserFn({
+        username: registerUsername,
+        password: registerPassword,
+        role: registerRole,
+      });
 
       setOkMessage("Usuario registrado correctamente en users.json. Ya puedes iniciar sesión.");
       setRegisterUsername("");
@@ -134,6 +130,10 @@ export default function Login() {
       <hr className="auth-divider" />
 
       <h2>Registro</h2>
+      <p>
+        Los usuarios registrados aquí se guardan en <code>src/roles-api/src/data/users.json</code>
+        {" "}mediante la API local (<code>POST /register</code>).
+      </p>
       <form onSubmit={handleRegister} className="auth-form">
         <label>
           Nuevo usuario

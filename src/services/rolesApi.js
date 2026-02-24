@@ -1,4 +1,8 @@
-const ROLES_API_BASE_URL = import.meta.env.VITE_ROLES_API_URL || "http://localhost:4000";
+export const ROLES_API_BASE_URL = (
+  import.meta.env.VITE_ROLES_API_URL || "http://localhost:4000"
+).replace(/\/$/, "");
+
+const REQUEST_TIMEOUT_MS = 5000;
 
 async function parseJsonSafe(res) {
   try {
@@ -8,13 +12,27 @@ async function parseJsonSafe(res) {
   }
 }
 
+function buildConnectionError() {
+  return new Error(
+    "No se pudo conectar con la API de roles. Revisa que esté arrancada (npm run start en src/roles-api), la URL VITE_ROLES_API_URL y CORS."
+  );
+}
+
 async function request(path, options = {}) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
   let response;
 
   try {
-    response = await fetch(`${ROLES_API_BASE_URL}${path}`, options);
+    response = await fetch(`${ROLES_API_BASE_URL}${path}`, {
+      ...options,
+      signal: controller.signal,
+    });
   } catch {
-    throw new Error("No se pudo conectar con la API de roles");
+    throw buildConnectionError();
+  } finally {
+    clearTimeout(timeoutId);
   }
 
   const data = await parseJsonSafe(response);
@@ -48,3 +66,22 @@ export async function updateUserRole(username, role) {
     body: JSON.stringify({ role }),
   });
 }
+
+export async function loginLocalApi(username, password) {
+  return request("/login-local", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password }),
+  });
+}
+
+export async function registerUserApi(payload) {
+  return request("/register", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+}
+
+// Alias defensivo para compatibilidad con nombres anteriores
+export const registerApiUser = registerUserApi;
