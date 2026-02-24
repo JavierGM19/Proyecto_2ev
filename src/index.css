@@ -109,7 +109,6 @@ h1 { margin: 0 0 0.4rem; font-size: 1.8rem; }
 .ok-message { color: #166534; }
 .auth-divider { margin: 1.2rem 0; border: 0; border-top: 1px solid #e5e7eb; }
 
-.admin-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; }
 
 .modal-overlay {
   position: fixed;
@@ -156,7 +155,6 @@ h1 { margin: 0 0 0.4rem; font-size: 1.8rem; }
   .menu { width: 100%; }
   .header-actions { width: 100%; justify-content: space-between; }
   .products-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
-  .admin-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 510px) {

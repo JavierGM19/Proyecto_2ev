@@ -121,12 +121,12 @@ export default function Admin() {
       )}
       {okMessage && <p className="ok-message alert alert-success mt-3">{okMessage}</p>}
 
-      <div className="admin-grid row g-3 mt-1">
+      <div className="row g-3 mt-1">
         {users.map((user) => {
           const shownRole = pendingRoles[user.username] || user.role;
 
           return (
-            <article key={user.username} className="admin-card col-12 col-md-6 col-lg-4">
+            <article key={user.username} className="admin-card col-12 col-md-6 col-lg-4 h-100">
               <p>
                 <strong>{user.username}</strong>
               </p>
