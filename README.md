@@ -1,54 +1,72 @@
-# React + Vite
+# DAW Shop — Proyecto final React
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 1) Descripción del proyecto
+**DAW Shop** es una aplicación web e-commerce desarrollada con **React + Vite**.
+Incluye catálogo de productos, búsqueda, carrito, login y un panel de administración para gestionar roles y usuarios.
 
-Currently, two official plugins are available:
+### Funcionalidades principales
+- Navegación por rutas con React Router.
+- Listado y detalle de productos consumiendo FakeStore API.
+- Inicio de sesión con dos flujos:
+  - **Admin maestro** (`mor_2314`) validado contra FakeStore API.
+  - **Usuarios locales** validados en API propia (`roles-api`).
+- Registro de usuarios en backend local (persistencia en JSON).
+- Panel admin protegido por rol para:
+  - editar roles en modo borrador + guardar cambios,
+  - eliminar usuarios (excepto admin principal) con confirmación.
+- Interfaz responsive con breakpoints explícitos: `990px`, `767px`, `510px`, `480px`.
+- Uso de Bootstrap 5 en componentes de UI.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+## 2) Framework y librerías (con versiones)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Frontend
+- **react**: `^19.2.0`
+- **react-dom**: `^19.2.0`
+- **react-router-dom**: `^7.13.0`
+- **@tanstack/react-query**: `^5.90.20`
+- **zustand**: `^5.0.11`
+- **vite**: `^7.3.1`
+- **tailwindcss**: `^4.1.18` (instalado en el proyecto)
 
-## Expanding the ESLint configuration
+### Backend local (`src/roles-api`)
+- **express**: `^5.2.1`
+- **cors**: `^2.8.6`
+- **dotenv**: `^17.3.1`
+- **jsonwebtoken**: `^9.0.3`
+- **zod**: `^4.3.6`
+- **nodemon** (dev): `^3.1.11`
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+> Nota: Bootstrap 5 se está cargando por CDN en `index.html`.
 
-## API de roles local
+---
 
-Guía rápida de uso/integración (API ya creada): `USO_API_ROLES.txt`.
+## 3) Requisitos del enunciado (estado actual)
 
-### Arranque rápido (frontend + backend)
+- ✅ Uso de rutas en React.
+- ✅ Consumo de API con GET y POST (también PATCH y DELETE).
+- ✅ Diseño responsive con breakpoints solicitados (`990/767/510/480`).
+- ✅ Login + apartado usuario/admin.
+- ✅ Uso de Bootstrap.
+- ✅ Estructura profesional por capas (`pages`, `components`, `services`, `store`, `routes`).
+- ⚠️ Despliegue estático: pendiente de publicar URL final (GitHub Pages/Netlify/Vercel).
+- ➖ PWA: opcional, no implementado.
+- ➖ React Native Android: no implementado.
 
-1. Frontend:
-   - `npm install`
-   - `npm run dev`
-2. Backend de roles (en otra terminal):
-   - `cd src/roles-api`
-   - `npm install`
-   - `npm run start`
+---
 
-### Dónde se guardan los usuarios registrados
+## 4) Estructura del proyecto
 
-Los usuarios se guardan en el fichero JSON del backend:
-
-- `src/roles-api/src/data/users.json`
-
-Así los registros no dependen de `localStorage` del navegador.
-
-### Si aparece “No se pudo conectar con la API de roles”
-
-Comprueba estas causas típicas:
-
-1. La API no está levantada:
-   - `cd src/roles-api`
-   - `npm install`
-   - `npm run start`
-2. La URL del frontend no coincide con la API:
-   - Por defecto se usa `http://localhost:4000`
-   - Puedes cambiarla con `VITE_ROLES_API_URL` en un `.env`
-3. CORS o red bloqueada:
-   - Verifica en consola del navegador si hay error CORS/Network
-4. Dependencias backend incompletas:
-   - Si falta `express`, reinstala dependencias en `src/roles-api`
+```text
+Proyecto_2ev/
+├─ src/
+│  ├─ app/                 # router principal
+│  ├─ components/          # componentes reutilizables
+│  ├─ layouts/             # layouts públicos
+│  ├─ pages/               # pantallas (Home, Login, Admin, Detail)
+│  ├─ routes/              # protección de rutas por rol
+│  ├─ services/            # consumo APIs (FakeStore y roles-api)
+│  ├─ store/               # estado global (auth/cart) con zustand
+│  └─ roles-api/           # API local (Express) para usuarios/roles
+└─ README.md
