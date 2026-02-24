@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { getRegisteredUsers } from "../services/localAuth";
-import { fetchUsers, ROLES_API_BASE_URL, updateUserRole } from "../services/rolesApi";
+import { deleteUser, fetchUsers, ROLES_API_BASE_URL, updateUserRole } from "../services/rolesApi";
 
 const MASTER_ADMIN_USERNAME = "mor_2314";
 const ALLOWED_ROLES = ["guest", "user", "admin"];
@@ -17,6 +17,8 @@ export default function Admin() {
   const [usingLocalFallback, setUsingLocalFallback] = useState(false);
   const [pendingRoles, setPendingRoles] = useState({});
   const [savingChanges, setSavingChanges] = useState(false);
+  const [deleteCandidate, setDeleteCandidate] = useState(null);
+  const [deletingUser, setDeletingUser] = useState(false);
 
   const pendingCount = useMemo(() => Object.keys(pendingRoles).length, [pendingRoles]);
 
@@ -87,6 +89,43 @@ export default function Admin() {
     }
   }
 
+
+  function askDeleteUser(username) {
+    setError("");
+    setOkMessage("");
+    setDeleteCandidate(username);
+  }
+
+  function closeDeleteModal() {
+    if (deletingUser) return;
+    setDeleteCandidate(null);
+  }
+
+  async function confirmDeleteUser() {
+    if (!deleteCandidate || usingLocalFallback) return;
+
+    setDeletingUser(true);
+    setError("");
+    setOkMessage("");
+
+    try {
+      await deleteUser(deleteCandidate);
+      setUsers((prev) => prev.filter((user) => user.username !== deleteCandidate));
+      setPendingRoles((prev) => {
+        if (!(deleteCandidate in prev)) return prev;
+        const next = { ...prev };
+        delete next[deleteCandidate];
+        return next;
+      });
+      setOkMessage(`Usuario ${deleteCandidate} eliminado correctamente`);
+      setDeleteCandidate(null);
+    } catch (err) {
+      setError(err?.message || "No se pudo eliminar el usuario");
+    } finally {
+      setDeletingUser(false);
+    }
+  }
+
   useEffect(() => {
     loadUsers();
   }, []);
@@ -138,6 +177,7 @@ export default function Admin() {
                   disabled={
                     usingLocalFallback ||
                     savingChanges ||
+                    deletingUser ||
                     user.username === MASTER_ADMIN_USERNAME
                   }
                   onChange={(e) => handleRoleDraft(user.username, e.target.value)}
@@ -153,12 +193,50 @@ export default function Admin() {
                 <small>La cuenta admin principal no se puede modificar.</small>
               )}
               {usingLocalFallback && user.username !== MASTER_ADMIN_USERNAME && (
-                <small>Conecta la API para guardar cambios de rol.</small>
+                <small>Conecta la API para guardar cambios de rol o eliminar usuarios.</small>
+              )}
+              {user.username !== MASTER_ADMIN_USERNAME && (
+                <button
+                  type="button"
+                  className="btn btn-outline-danger btn-sm mt-3"
+                  disabled={usingLocalFallback || savingChanges || deletingUser}
+                  onClick={() => askDeleteUser(user.username)}
+                >
+                  Borrar
+                </button>
               )}
             </article>
           );
         })}
       </div>
+
+      {deleteCandidate && (
+        <div className="confirm-modal-overlay" role="dialog" aria-modal="true">
+          <div className="confirm-modal-card">
+            <h2>Confirmar borrado</h2>
+            <p>¿Quieres borrar al usuario <strong>{deleteCandidate}</strong>?</p>
+            <div className="confirm-modal-actions">
+              <button
+                type="button"
+                className="btn btn-danger"
+                onClick={confirmDeleteUser}
+                disabled={deletingUser}
+              >
+                {deletingUser ? "Borrando..." : "SI"}
+              </button>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={closeDeleteModal}
+                disabled={deletingUser}
+              >
+                NO
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </section>
   );
 }

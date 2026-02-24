@@ -157,6 +157,25 @@ app.patch("/users/:username/role", (req, res) => {
   return res.json(publicUser(users[idx]));
 });
 
+app.delete("/users/:username", (req, res) => {
+  const { username } = req.params;
+
+  if (username === MASTER_ADMIN_USERNAME) {
+    return res.status(403).json({ message: "La cuenta admin principal no se puede eliminar" });
+  }
+
+  const users = readUsers();
+  const idx = users.findIndex((x) => x.username === username);
+
+  if (idx === -1) {
+    return res.status(404).json({ message: "Usuario no encontrado" });
+  }
+
+  users.splice(idx, 1);
+  writeUsers(users);
+  return res.status(204).send();
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });

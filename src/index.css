@@ -191,3 +191,33 @@ h1 { margin: 0 0 0.4rem; font-size: 1.8rem; }
   border-color: #198754;
   color: #fff;
 }
+
+
+.confirm-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  z-index: 1100;
+}
+
+.confirm-modal-card {
+  width: min(420px, 100%);
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  padding: 1rem;
+}
+
+.confirm-modal-card h2 {
+  font-size: 1.1rem;
+  margin-bottom: 0.8rem;
+}
+
+.confirm-modal-actions {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: flex-end;
+}

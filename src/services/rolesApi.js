@@ -67,6 +67,12 @@ export async function updateUserRole(username, role) {
   });
 }
 
+export async function deleteUser(username) {
+  return request(`/users/${encodeURIComponent(username)}`, {
+    method: "DELETE",
+  });
+}
+
 export async function loginLocalApi(username, password) {
   return request("/login-local", {
     method: "POST",
