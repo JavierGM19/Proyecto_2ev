@@ -176,3 +176,20 @@ h1 { margin: 0 0 0.4rem; font-size: 1.8rem; }
   .btn-primary,
   select { font-size: 0.82rem; padding: 0.4rem 0.6rem; }
 }
+
+.save-roles-btn {
+  background: #ffffff;
+  border: 1px solid #ced4da;
+  color: #1f2937;
+  min-width: 170px;
+}
+
+.save-roles-btn:disabled {
+  opacity: 1;
+}
+
+.save-roles-btn--pending {
+  background: #198754;
+  border-color: #198754;
+  color: #fff;
+}
