@@ -12,6 +12,12 @@ export async function getProductById(id) {
     return res.json();
 }
 
+export async function getCategories() {
+    const res = await fetch(`${BASE_URL}/products/categories`);
+    if (!res.ok) throw new Error("Error al cargar categorias");
+    return res.json();
+}
+
 export async function login(username, password) {
     const res = await fetch(`${BASE_URL}/auth/login`, {
         method: "POST",

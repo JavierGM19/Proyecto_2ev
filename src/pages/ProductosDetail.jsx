@@ -1,40 +1,38 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getProductById } from "../services/fakeStoreApi";
+import { useCartStore } from "../store/cartStore";
+import { translateApiTerm } from "../i18n/apiDictionary";
 
 export default function ProductosDetail() {
-    const { id } = useParams();
+  const { id } = useParams();
+  const addItem = useCartStore((s) => s.addItem);
 
-    const { data, isLoading, error } = useQuery({
-        queryKey: ["product", id],
-        queryFn: () => getProductById(id),
-    });
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["product", id],
+    queryFn: () => getProductById(id),
+  });
 
-    if (isLoading) return <p>Cargando producto...</p>;
-    if (error) return <p>Error cargando producto</p>;
-    if (!data) return <p>No existe el producto</p>;
+  if (isLoading) return <p>Cargando producto...</p>;
+  if (error) return <p>Error cargando producto.</p>;
+  if (!data) return <p>Producto no encontrado.</p>;
 
-    return (
-        <div className="max-w-3xl">
-            <h1 className="text-2xl font-bold">{data.title}</h1>
-            <p className="mt-2 text-sm">{data.category}</p>
+  return (
+    <section className="detail-layout">
+      <div className="detail-image-wrap">
+        <img src={data.image} alt={data.title} className="detail-image" />
+      </div>
 
-            <div className="mt-6 grid gap-6 md:grid-cols-2">
-                <img
-                    src={data.image}
-                    alt={data.title}
-                    className="w-full max-w-sm"
-                />
+      <div>
+        <h1>{data.title}</h1>
+        <p className="product-category">{data.category}</p>
+        <p className="product-price">{data.price} €</p>
+        <p>{data.description}</p>
 
-                <div>
-                    <p className="text-lg font-semibold">{data.price} €</p>
-                    <p className="mt-4">{data.description}</p>
-
-                    <button className="mt-6 border px-4 py-2">
-                        Añadir al carrito (más adelante)
-                    </button>
-                </div>
-            </div>
-        </div>
-    );
+        <button type="button" onClick={() => addItem(data)} className="btn-primary">
+          Añadir al carrito
+        </button>
+      </div>
+    </section>
+  );
 }

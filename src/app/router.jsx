@@ -5,12 +5,14 @@ import Login from "../pages/Login";
 import Admin from "../pages/Admin";
 import ProtectedRoute from "../routes/ProtectedRoute";
 import ProductosDetail from "../pages/ProductosDetail";
+import InfoApi from "../pages/InfoApi";
 
 export const router = createBrowserRouter([
   {
     element: <PublicLayout />,
     children: [
       { path: "/", element: <Home /> },
+      { path: "/info", element: <InfoApi /> },
       { path: "/login", element: <Login /> },
       { path: "/product/:id", element: <ProductosDetail /> },
 

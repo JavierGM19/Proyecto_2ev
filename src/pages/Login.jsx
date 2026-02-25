@@ -1,106 +1,172 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { login } from "../services/fakeStoreApi";
+import { login as loginFakeStore } from "../services/fakeStoreApi";
+import {
+  fetchRoleByUsername,
+  loginLocalApi,
+  registerApiUser,
+  registerUserApi,
+} from "../services/rolesApi";
 import { useAuthStore } from "../store/authStore";
 
-const ROLES_API_URL = "http://localhost:4000/role";
+const MASTER_ADMIN = {
+  username: "mor_2314",
+  password: "83r5^_",
+};
+
+const registerUserFn =
+  typeof registerUserApi === "function"
+    ? registerUserApi
+    : typeof registerApiUser === "function"
+      ? registerApiUser
+      : null;
 
 export default function Login() {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+  const setSession = useAuthStore((s) => s.setSession);
 
-    // Auth store
-    const setSession = useAuthStore((s) => s.setSession);
-    const isLogged = useAuthStore((s) => s.isLogged);
-    const roleStored = useAuthStore((s) => s.role);
+  const [username, setUsername] = useState(MASTER_ADMIN.username);
+  const [password, setPassword] = useState(MASTER_ADMIN.password);
+  const [error, setError] = useState("");
+  const [okMessage, setOkMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
-    // Form state
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
+  const [registerUsername, setRegisterUsername] = useState("");
+  const [registerPassword, setRegisterPassword] = useState("");
+  const [registerRole, setRegisterRole] = useState("user");
+  const [registerLoading, setRegisterLoading] = useState(false);
 
-    // UI state
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("");
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setError("");
+    setOkMessage("");
+    setLoading(true);
 
-    // Si ya hay sesión, fuera de /login
-    useEffect(() => {
-        if (!isLogged) return;
+    try {
+      const cleanUsername = username.trim();
+      let session = null;
 
-        if (roleStored === "admin") navigate("/admin", { replace: true });
-        else navigate("/", { replace: true });
-    }, [isLogged, roleStored, navigate]);
+      if (cleanUsername === MASTER_ADMIN.username) {
+        const apiAuth = await loginFakeStore(cleanUsername, password);
+        const apiRole = await fetchRoleByUsername(cleanUsername).catch(() => "admin");
+        session = {
+          token: apiAuth.token,
+          username: cleanUsername,
+          role: apiRole,
+        };
+      } else {
+        session = await loginLocalApi(cleanUsername, password);
+      }
 
-    async function handleSubmit(e) {
-        e.preventDefault();
-        setError("");
-        setLoading(true);
-
-        try {
-            const cleanUsername = username.trim();
-            const data = await login(cleanUsername, password); // Login Fake Store API
-
-            let role = "user";
-
-            try {
-                const roleResponse = await fetch(ROLES_API_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ username: cleanUsername }),
-                });
-
-                if (roleResponse.ok) {
-                    const roleData = await roleResponse.json();
-                    role = roleData?.role || "user";
-                }
-            } catch {
-                role = "user";
-            }
-
-            setSession({ token: data.token, role, username: cleanUsername });
-
-            // Redirección según rol
-            if (role === "admin") navigate("/admin", { replace: true });
-            else navigate("/", { replace: true });
-        } catch (err) {
-            setError(err?.message || "Error al iniciar sesión");
-        } finally {
-            setLoading(false);
-        }
+      setSession(session);
+      navigate(session.role === "admin" ? "/admin" : "/");
+    } catch (err) {
+      setError(err?.message || "No se pudo iniciar sesión");
+    } finally {
+      setLoading(false);
     }
+  }
 
-    return (
-        <div className="max-w-sm">
-            <h1 className="text-2xl font-bold mb-4">Login</h1>
+  async function handleRegister(e) {
+    e.preventDefault();
+    setError("");
+    setOkMessage("");
+    setRegisterLoading(true);
 
-            <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-                <input
-                    className="border p-2"
-                    placeholder="username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    autoComplete="username"
-                />
+    try {
+      if (!registerUserFn) {
+        throw new Error("registerUserApi no está disponible. Revisa src/services/rolesApi.js");
+      }
 
-                <input
-                    className="border p-2"
-                    placeholder="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    autoComplete="current-password"
-                />
+      await registerUserFn({
+        username: registerUsername,
+        password: registerPassword,
+        role: registerRole,
+      });
 
-                <button className="border p-2" disabled={loading}>
-                    {loading ? "Entrando..." : "Entrar"}
-                </button>
+      setOkMessage("Usuario registrado correctamente en users.json. Ya puedes iniciar sesión.");
+      setRegisterUsername("");
+      setRegisterPassword("");
+      setRegisterRole("user");
+    } catch (err) {
+      setError(err?.message || "No se pudo registrar el usuario");
+    } finally {
+      setRegisterLoading(false);
+    }
+  }
 
-                {error && <p className="text-red-600">{error}</p>}
+  return (
+    <section className="auth-box mx-auto">
+      <h1>Iniciar sesión</h1>
+      <p>
+        Admin maestro (FakeStore API): <strong>{MASTER_ADMIN.username}</strong> /
+        <strong> {MASTER_ADMIN.password}</strong>
+      </p>
 
-                <p className="text-sm text-gray-600">
-                    Prueba FakeStore (demo): <br />
-                    username: <b>mor_2314</b> <br />
-                    password: <b>83r5^_</b>
-                </p>
-            </form>
-        </div>
-    );
+      <form onSubmit={handleSubmit} className="auth-form">
+        <label>
+          Usuario
+          <input className="form-control" value={username} onChange={(e) => setUsername(e.target.value)} />
+        </label>
+
+        <label>
+          Contraseña
+          <input
+            className="form-control"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </label>
+
+        <button type="submit" disabled={loading} className="btn btn-primary">
+          {loading ? "Entrando..." : "Entrar"}
+        </button>
+
+        {error && <p className="error">{error}</p>}
+        {okMessage && <p className="ok-message">{okMessage}</p>}
+      </form>
+
+      <hr className="auth-divider" />
+
+      <h2>Registro</h2>
+      <p>
+        Los usuarios registrados aquí se guardan en <code>src/roles-api/src/data/users.json</code>
+        {" "}mediante la API local (<code>POST /register</code>).
+      </p>
+      <form onSubmit={handleRegister} className="auth-form">
+        <label>
+          Nuevo usuario
+          <input
+            className="form-control"
+            value={registerUsername}
+            onChange={(e) => setRegisterUsername(e.target.value)}
+          />
+        </label>
+
+        <label>
+          Contraseña
+          <input
+            className="form-control"
+            type="password"
+            value={registerPassword}
+            onChange={(e) => setRegisterPassword(e.target.value)}
+          />
+        </label>
+
+        <label>
+          Tipo de cuenta
+          <select className="form-select" value={registerRole} onChange={(e) => setRegisterRole(e.target.value)}>
+            <option value="user">Usuario</option>
+            <option value="guest">Invitado</option>
+            <option value="admin">Admin</option>
+          </select>
+        </label>
+
+        <button type="submit" disabled={registerLoading} className="btn btn-primary">
+          {registerLoading ? "Guardando..." : "Registrar"}
+        </button>
+      </form>
+    </section>
+  );
 }
