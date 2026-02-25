@@ -70,3 +70,59 @@ Proyecto_2ev/
 │  ├─ store/               # estado global (auth/cart) con zustand
 │  └─ roles-api/           # API local (Express) para usuarios/roles
 └─ README.md
+```
+
+---
+
+## 5) Guía de instalación
+
+### Requisitos previos
+- Node.js 20 o superior
+- npm 10 o superior
+
+### 1. Clonar repositorio
+```bash
+git clone https://github.com/JavierGM19/Proyecto_2ev.git
+cd Proyecto_2ev
+```
+
+### 2. Instalar dependencias del frontend
+```bash
+npm install
+```
+
+### 3. Instalar dependencias de la API local de roles
+```bash
+cd src/roles-api
+npm install
+cd ../..
+```
+
+### 4. Arrancar la API local (terminal 1)
+```bash
+cd src/roles-api
+npm run start
+```
+
+La API quedará disponible en `http://localhost:4000`.
+
+### 5. Arrancar frontend (terminal 2)
+```bash
+npm run dev
+```
+
+La web quedará disponible en `http://localhost:5173`.
+
+### 6. Variables de entorno (opcional)
+Puedes crear un archivo `.env` en la raíz para cambiar la URL de la API de roles:
+
+```env
+VITE_ROLES_API_URL=http://localhost:4000
+```
+
+---
+
+## 6) Licencia
+
+Este proyecto se distribuye bajo licencia **MIT**.
+Consulta el fichero [LICENSE](./LICENSE) para el texto completo.
