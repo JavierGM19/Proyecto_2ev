@@ -35,7 +35,14 @@ jobs:
         run: npm ci
 
       - name: Build
-        run: npm run build
+        run: |
+          if [ -z "${VITE_ROLES_API_URL}" ]; then
+            echo "Missing VITE_ROLES_API_URL repository variable."
+            exit 1
+          fi
+          npm run build
+        env:
+          VITE_ROLES_API_URL: ${{ vars.VITE_ROLES_API_URL }}
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
