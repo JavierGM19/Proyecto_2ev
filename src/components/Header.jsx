@@ -48,6 +48,7 @@ export default function Header() {
 
           <nav className="menu nav">
             <NavLink className="nav-link px-2" to="/">Inicio</NavLink>
+            <NavLink className="nav-link px-2" to="/info">Info API</NavLink>
             {role === "admin" && <NavLink className="nav-link px-2" to="/admin">Admin</NavLink>}
           </nav>
 

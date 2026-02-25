@@ -142,6 +142,65 @@ h1 { margin: 0 0 0.4rem; font-size: 1.8rem; }
   color: #6b7280;
 }
 
+.info-page {
+  display: grid;
+  gap: 1rem;
+}
+
+.info-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.8rem;
+}
+
+.info-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 1rem;
+}
+
+.info-card h2 {
+  margin: 0 0 0.6rem;
+  font-size: 1rem;
+}
+
+.info-main-value {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.info-category-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.info-badge {
+  padding: 0.25rem 0.55rem;
+  background: #eef2ff;
+  color: #1e3a8a;
+  border-radius: 999px;
+  font-size: 0.85rem;
+}
+
+.info-products-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.info-products-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.8rem;
+  border-bottom: 1px solid #f3f4f6;
+  padding-bottom: 0.35rem;
+}
+
 /* Breakpoints solicitados: 990px, 767px, 510px, 480px */
 @media (max-width: 990px) {
   .container { width: min(940px, 94%); }
