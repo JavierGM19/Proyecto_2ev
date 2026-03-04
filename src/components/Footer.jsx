@@ -2,7 +2,7 @@ export default function Footer() {
   return (
     <footer className="footer">
       <div className="container">
-        <p>Tienda de ejemplo para 2º DAW · API FakeStore</p>
+        <p>DAW Shop · Proyecto de clase (2º DAW)</p>
       </div>
     </footer>
   );
