@@ -1,6 +1,13 @@
-export const ROLES_API_BASE_URL = (
-  import.meta.env.VITE_ROLES_API_URL || "http://localhost:4000"
-).replace(/\/$/, "");
+function normalizeApiBaseUrl(rawUrl) {
+  const fallback = "http://localhost:4000";
+  const value = String(rawUrl || fallback).trim().replace(/\/$/, "");
+
+  if (/^https?:\/\//i.test(value)) return value;
+  if (/^(localhost|127\.0\.0\.1)(:\d+)?$/i.test(value)) return `http://${value}`;
+  return `https://${value}`;
+}
+
+export const ROLES_API_BASE_URL = normalizeApiBaseUrl(import.meta.env.VITE_ROLES_API_URL);
 
 const REQUEST_TIMEOUT_MS = 5000;
 
