@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getCategories, getProducts } from "../services/fakeStoreApi";
+import { fetchUsers, ROLES_API_BASE_URL } from "../services/rolesApi";
 
 function formatPrice(value) {
   return value.toLocaleString("es-ES", {
@@ -29,6 +30,16 @@ export default function InfoApi() {
     queryFn: getCategories,
   });
 
+  const {
+    data: localUsers = [],
+    isLoading: localUsersLoading,
+    error: localUsersError,
+  } = useQuery({
+    queryKey: ["api-info-local-users"],
+    queryFn: fetchUsers,
+    retry: 1,
+  });
+
   const metrics = useMemo(() => {
     if (!products.length) {
       return {
@@ -50,6 +61,11 @@ export default function InfoApi() {
       maxPrice: maxPriceProduct,
     };
   }, [products]);
+
+  const localRoles = useMemo(() => {
+    const roles = localUsers.map((user) => user.role).filter(Boolean);
+    return [...new Set(roles)];
+  }, [localUsers]);
 
   if (productsLoading || categoriesLoading) return <p>Cargando información de la API...</p>;
   if (productsError || categoriesError) return <p>No se pudo cargar la información de FakeStore.</p>;
@@ -107,6 +123,46 @@ export default function InfoApi() {
               <strong>{formatPrice(product.price)}</strong>
             </li>
           ))}
+        </ul>
+      </article>
+
+      <div>
+        <h1>Informacion de API local</h1>
+        <p className="subtitle">Resumen de funciones para gestionar usuarios y roles.</p>
+      </div>
+
+      <article className="info-card">
+        <h2>API local de usuarios y roles</h2>
+        <p>
+          Esta API se usa para gestionar usuarios de la aplicacion y sus permisos por rol.
+          Permite registrar cuentas, iniciar sesion local, consultar roles y administrar usuarios.
+        </p>
+        <p>
+          URL base esperada: <code>{ROLES_API_BASE_URL}</code>
+        </p>
+
+        {localUsersLoading && <p>Comprobando conexion con la API local...</p>}
+        {localUsersError && (
+          <p className="error">
+            No se pudo conectar con la API local ahora mismo. Aun asi, estas son sus funciones.
+          </p>
+        )}
+        {!localUsersLoading && !localUsersError && (
+          <p>
+            Usuarios detectados: <strong>{localUsers.length}</strong>
+            {localRoles.length > 0 ? ` · Roles actuales: ${localRoles.join(", ")}` : ""}
+          </p>
+        )}
+
+        <h3>Funciones que tiene</h3>
+        <ul className="info-functions-list">
+          <li><code>GET /</code>: comprobar si la API esta funcionando.</li>
+          <li><code>POST /role</code>: obtener el rol de un usuario por su username.</li>
+          <li><code>GET /users</code>: listar usuarios (sin exponer password).</li>
+          <li><code>POST /login-local</code>: login de usuarios locales (no admin maestro).</li>
+          <li><code>POST /register</code>: registrar un usuario nuevo con rol.</li>
+          <li><code>PATCH /users/:username/role</code>: actualizar rol de un usuario.</li>
+          <li><code>DELETE /users/:username</code>: eliminar usuario.</li>
         </ul>
       </article>
     </section>

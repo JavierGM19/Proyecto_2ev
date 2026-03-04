@@ -17,7 +17,6 @@ const MASTER_ADMIN_USERNAME = "mor_2314";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Fichero JSON compartido en el frontend (src/data/localUsers.json)
 const DATA_DIR = path.resolve(__dirname, "./data");
 const USERS_FILE = path.join(DATA_DIR, "users.json");
 

@@ -5,7 +5,7 @@
     "role": "admin"
   },
   {
-    "username": "johnd",
+    "username": "patata",
     "password": "m38rmF$",
     "role": "user"
   },
@@ -13,10 +13,5 @@
     "username": "guest_demo",
     "password": "guest123",
     "role": "guest"
-  },
-  {
-    "username": "patata",
-    "password": "1234",
-    "role": "user"
   }
 ]

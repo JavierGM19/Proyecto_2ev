@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import { translateApiTerm } from "../i18n/apiDictionary";
 
 export default function ProductCard({ product }) {
   return (

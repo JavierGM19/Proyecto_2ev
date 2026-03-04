@@ -5,14 +5,14 @@ export const useAuthStore = create(
     persist(
         (set) => ({
             token: null,
-            role: null,        // <- sin login NO hay rol
+            role: null,
             username: null,
             isLogged: false,
 
             setSession: ({ token, role = "USER", username = null }) => {
                 set({
                     token,
-                    role,           // "USER" o "ADMIN"
+                    role,
                     username,
                     isLogged: Boolean(token),
                 });
@@ -21,7 +21,7 @@ export const useAuthStore = create(
             logout: () => {
                 set({
                     token: null,
-                    role: null,     // <- al salir vuelve a invitado
+                    role: null,
                     username: null,
                     isLogged: false,
                 });

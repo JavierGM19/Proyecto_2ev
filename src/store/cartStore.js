@@ -4,7 +4,7 @@ import { persist, createJSONStorage } from "zustand/middleware";
 export const useCartStore = create(
     persist(
         (set, get) => ({
-            items: [], // [{ id, title, price, image, quantity }]
+            items: [],
 
             addItem: (product) => {
                 if (!product?.id) return;
@@ -54,7 +54,7 @@ export const useCartStore = create(
         }),
         {
             name: "cart-storage",
-            storage: createJSONStorage(() => sessionStorage), // temporal por pestaña
+            storage: createJSONStorage(() => sessionStorage),
         }
     )
 );

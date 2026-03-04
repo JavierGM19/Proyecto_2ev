@@ -89,5 +89,4 @@ export async function registerUserApi(payload) {
   });
 }
 
-// Alias defensivo para compatibilidad con nombres anteriores
 export const registerApiUser = registerUserApi;
