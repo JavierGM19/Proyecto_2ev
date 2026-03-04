@@ -9,7 +9,7 @@ function normalizeApiBaseUrl(rawUrl) {
 
 export const ROLES_API_BASE_URL = normalizeApiBaseUrl(import.meta.env.VITE_ROLES_API_URL);
 
-const REQUEST_TIMEOUT_MS = 5000;
+const REQUEST_TIMEOUT_MS = 15000;
 
 async function parseJsonSafe(res) {
   try {
